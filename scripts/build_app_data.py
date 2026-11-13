@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # SI-assisted: drafted with Claude (Anthropic); reviewed by the team.
-"""Build web/src/data/pyrovector.json, the data bundle the PyroVector app ranks over.
+"""Build web/public/data/pyrovector.json, the data bundle the PyroVector app ranks over.
 
 Inputs (all produced by the repo's own scripts, all traceable to NASA PSI):
     data/investigations.json              investigation text, DOI, portal URL
@@ -25,7 +25,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 DATA = ROOT / "data"
 RAW = DATA / "raw" / "tables"
-OUT = ROOT / "web" / "src" / "data" / "pyrovector.json"
+OUT = ROOT / "web" / "public" / "data" / "pyrovector.json"
 
 # Pillar / scale / phase per investigation. PROVISIONAL mapping, see agents/DECISIONS.md.
 META = {
