@@ -1,0 +1,10 @@
+data/raw/
+__pycache__/
+*.pyc
+.venv/
+venv/
+.env
+.env.*
+!.env.example
+node_modules/
+.DS_Store
