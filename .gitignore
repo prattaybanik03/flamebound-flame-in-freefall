@@ -8,3 +8,6 @@ venv/
 !.env.example
 node_modules/
 .DS_Store
+web/.next/
+web/node_modules/
+web/.vercel/
