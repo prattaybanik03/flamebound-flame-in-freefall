@@ -149,6 +149,7 @@ export default function Controls({ target, onChange }: Props) {
           max={100}
           step={0.5}
           display={target.o2Pct.toFixed(1)}
+          note={`O₂ partial pressure ${((target.o2Pct / 100) * target.pressureKPa).toFixed(1)} kPa (O₂% × pressure; context, not scored)`}
           onChange={(v) => set({ o2Pct: v })}
         />
         <Slider

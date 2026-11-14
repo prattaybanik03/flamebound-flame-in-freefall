@@ -2,7 +2,7 @@
 // Result card (BUILD_PLAN A4). Every number shown is either a NASA raw cell (verbatim)
 // or a computed BCMS quantity. NASA values are never rounded; the raw cell is shown.
 import type { Component, Scored } from "@/lib/bcms";
-import type { Condition } from "@/lib/types";
+import type { Condition, PsiRecord, Target } from "@/lib/types";
 import { DIM_LABEL, fmt, whyAbove } from "@/lib/explain";
 
 const UNIT: Partial<Record<Component["dim"], string>> = { o2: "% pts", flow: "cm/s", pressure: "kPa" };
@@ -39,6 +39,22 @@ function basisText(c: Component, cond?: Condition): string {
   return `NASA cell "${c.raw}"${col}${canon ? ` → ${canon}` : ""}`;
 }
 
+const SINGLE = new Set(["recorded", "approx", "footnote"]);
+
+/** O2 partial pressure derived from a record's own single-valued O2 and pressure (context, not scored). */
+function partialPressure(r: PsiRecord): string | null {
+  const { o2, pressure: p } = r;
+  if (!SINGLE.has(o2.status) || !SINGLE.has(p.status) || o2.levels.length || p.levels.length) return null;
+  if (o2.min === null || o2.min !== o2.max || p.min === null || p.min !== p.max) return null;
+  return ((o2.min / 100) * p.min).toFixed(1);
+}
+
+/** NASA's recorded flow direction for the record, when the table gives one. */
+function recordDirection(r: PsiRecord): string | null {
+  const v = r.outcome?.fields?.["Flow direction"]?.trim();
+  return v ? v : null;
+}
+
 function Bar({ c, cond }: { c: Component; cond?: Condition }) {
   const recorded = c.score !== null;
   const pct = recorded ? Math.round(c.score! * 100) : 0;
@@ -65,7 +81,7 @@ function Bar({ c, cond }: { c: Component; cond?: Condition }) {
   );
 }
 
-export default function ResultCard({ scored, rank, next }: { scored: Scored; rank: number; next?: Scored | null }) {
+export default function ResultCard({ scored, rank, next, target }: { scored: Scored; rank: number; next?: Scored | null; target?: Target }) {
   const { record: r, investigation: inv } = scored;
   const unit = inv.recordsNotTests ? "Record" : "Test";
   const outcome = Object.entries(r.outcome?.fields ?? {}).filter(([, v]) => v.trim() !== "");
@@ -114,6 +130,24 @@ export default function ResultCard({ scored, rank, next }: { scored: Scored; ran
           {r.material ? ` · ${r.material}` : ""}
           {r.materialNote ? ` (${r.materialNote})` : ""}
         </p>
+        {(() => {
+          const pp = partialPressure(r);
+          return pp ? (
+            <p className="mt-1 text-xs text-slate-500">
+              O₂ partial pressure (derived from NASA&apos;s O₂ and pressure): {pp} kPa · context, not scored
+            </p>
+          ) : null;
+        })()}
+        {(() => {
+          const dir = recordDirection(r);
+          if (!dir || !target || dir.toLowerCase().includes(target.flowDirection)) return null;
+          return (
+            <p className="mt-2 rounded border border-amber-700/60 bg-amber-500/10 px-2 py-1 text-xs text-amber-200">
+              Flow direction differs: NASA&apos;s test ran <strong>{dir}</strong>; you selected <strong>{target.flowDirection}</strong>.
+              Concurrent and opposed flame spread behave differently, so treat this match with care. Not scored.
+            </p>
+          );
+        })()}
 
         {outcome.length > 0 && (
           <dl className="mt-2 grid grid-cols-[auto_1fr] gap-x-3 gap-y-0.5 text-xs">

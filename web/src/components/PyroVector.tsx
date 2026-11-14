@@ -4,9 +4,10 @@
 
 import { useEffect, useMemo, useState } from "react";
 import type { Bundle, Target } from "@/lib/types";
-import { DEFAULT_TARGET } from "@/lib/presets";
+import { DEFAULT_TARGET, MATERIAL_OPTIONS } from "@/lib/presets";
 import { hazard as computeHazard, rank, scoreRecord } from "@/lib/bcms";
 import { buildVerdict } from "@/lib/verdict";
+import { searchFromTarget, targetFromSearch } from "@/lib/url";
 import VerdictCard from "./VerdictCard";
 import RegimeMap from "./RegimeMap";
 import Method from "./Method";
@@ -16,6 +17,7 @@ import HazardBanner from "./HazardBanner";
 import ResultCard from "./ResultCard";
 
 const DATA_URL = "/data/pyrovector.json";
+const MATERIAL_KEYS: ReadonlySet<string> = new Set(MATERIAL_OPTIONS.map((m) => m.key));
 
 function isBundle(x: unknown): x is Bundle {
   const b = x as Partial<Bundle> | null;
@@ -28,6 +30,22 @@ export default function PyroVector() {
   const [attempt, setAttempt] = useState(0);
   // Target conditions: the single source of truth for ranking (A3+).
   const [target, setTarget] = useState<Target>(DEFAULT_TARGET);
+  // Shareable scenarios: read the URL once on mount, then keep it in sync with the target.
+  const [urlReady, setUrlReady] = useState(false);
+  const [copied, setCopied] = useState(false);
+  useEffect(() => {
+    if (!urlReady) return;
+    window.history.replaceState(null, "", `${window.location.pathname}?${searchFromTarget(target)}`);
+  }, [target, urlReady]);
+  const copyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      setCopied(false);
+    }
+  };
 
   const ranked = useMemo(
     () => (bundle ? rank(bundle.records, bundle.investigations, target) : []),
@@ -76,7 +94,11 @@ export default function PyroVector() {
         if (process.env.NODE_ENV !== "production") {
           console.log(`PyroVector data: ${json.investigations.length} investigations, ${json.records.length} records`);
         }
+        // Apply a shared scenario from the URL (if any) once the data is ready, then start syncing.
+        const fromUrl = targetFromSearch(window.location.search, MATERIAL_KEYS);
+        if (Object.keys(fromUrl).length) setTarget((t) => ({ ...t, ...fromUrl }));
         setBundle(json);
+        setUrlReady(true);
       })
       .catch((e: unknown) => {
         if (ctrl.signal.aborted) return;
@@ -93,7 +115,14 @@ export default function PyroVector() {
 
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-6 px-4 py-8 sm:px-6">
-      <header>
+      <header className="relative">
+        <button
+          type="button"
+          onClick={copyLink}
+          className="absolute right-0 top-1 rounded-md border border-slate-700 px-3 py-1.5 text-xs text-slate-200 hover:border-slate-500"
+        >
+          {copied ? "Link copied" : "Copy scenario link"}
+        </button>
         <h1 className="text-3xl font-semibold tracking-tight">PyroVector</h1>
         <p className="mt-2 max-w-3xl text-sm text-slate-400">
           NASA microgravity combustion investigations, matched to your habitat conditions and cited to their DOIs.
@@ -138,7 +167,7 @@ export default function PyroVector() {
               <p className="text-sm text-slate-400">No {target.pillar} investigation in the PSI data is available to match.</p>
             )}
             {activeCards.map((s, i) => (
-              <ResultCard key={s.record.id} scored={s} rank={ranked.indexOf(s) + 1} next={activeCards[i + 1] ?? null} />
+              <ResultCard key={s.record.id} scored={s} rank={ranked.indexOf(s) + 1} next={activeCards[i + 1] ?? null} target={target} />
             ))}
             {otherCards.length > 0 && (
               <>
@@ -149,6 +178,7 @@ export default function PyroVector() {
                     scored={s}
                     rank={ranked.indexOf(s) + 1}
                     next={otherCards[i + 1] ?? null}
+                    target={target}
                   />
                 ))}
               </>
