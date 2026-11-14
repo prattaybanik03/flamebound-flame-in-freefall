@@ -3,7 +3,9 @@
 // App shell: loads the PSI data bundle (built by scripts/build_app_data.py) once on mount.
 
 import { useEffect, useState } from "react";
-import type { Bundle } from "@/lib/types";
+import type { Bundle, Target } from "@/lib/types";
+import { DEFAULT_TARGET } from "@/lib/presets";
+import Controls from "./Controls";
 
 const DATA_URL = "/data/pyrovector.json";
 
@@ -16,6 +18,8 @@ export default function PyroVector() {
   const [bundle, setBundle] = useState<Bundle | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [attempt, setAttempt] = useState(0);
+  // Target conditions: the single source of truth for ranking (A3+).
+  const [target, setTarget] = useState<Target>(DEFAULT_TARGET);
 
   useEffect(() => {
     const ctrl = new AbortController();
@@ -52,6 +56,8 @@ export default function PyroVector() {
           NASA microgravity combustion investigations, matched to your habitat conditions and cited to their DOIs.
         </p>
       </header>
+
+      <Controls target={target} onChange={setTarget} />
 
       {error ? (
         <div role="alert" className="rounded-lg border border-red-900 bg-red-950/40 p-4">
