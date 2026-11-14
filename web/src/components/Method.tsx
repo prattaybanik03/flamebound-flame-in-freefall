@@ -99,7 +99,8 @@ export default function Method({ bundle }: { bundle: Bundle }) {
         <h2 className={H}>Use of SI</h2>
         <p className={P}>
           The solution concept and product decisions are the team&apos;s own. Code was written with help from Claude
-          (Anthropic), and the build plan was reviewed with Codex (OpenAI). SI-assisted source files carry a header
+          (Anthropic). Codex (OpenAI) reviewed the build plan and the app, and wrote the explanation and
+          numeric-check fixes. SI-assisted source files carry a header
           comment, and the full disclosure is in the project README under &quot;Use of SI&quot;. Rankings and numbers are
           computed deterministically from NASA&apos;s data; no SI model produces them.
         </p>
