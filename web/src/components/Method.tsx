@@ -1,7 +1,7 @@
 // SI-assisted: drafted with Claude (Anthropic); reviewed by the team.
 // Method and limits footer (BUILD_PLAN A7). Weights and constants are imported from the
 // engine, so this text cannot drift from the score that is actually computed.
-import { MATERIAL_SCORES, PILLAR_SCORES, REFUSAL_THRESHOLD, SCALES, WEIGHTS } from "@/lib/bcms";
+import { MATERIAL_SCORES, O2_GATE_PTS, PILLAR_SCORES, REFUSAL_THRESHOLD, SCALES, WEIGHTS } from "@/lib/bcms";
 import type { Bundle } from "@/lib/types";
 
 const pct = (w: number) => `${Math.round(w * 100)}%`;
@@ -56,8 +56,20 @@ export default function Method({ bundle }: { bundle: Bundle }) {
         </p>
         <p className={P}>
           An Extrapolation Hazard is shown when the best match in the active pillar is below {REFUSAL_THRESHOLD}% (a
-          provisional retrieval threshold, not a validated safety boundary) or when 0.16 g or 0.38 g is selected. No warning
-          does not mean safe.
+          provisional retrieval threshold, not a validated safety boundary), when that match&apos;s O₂ differs from yours by
+          more than ±{O2_GATE_PTS} % pts or was not recorded, or when 0.16 g or 0.38 g is selected. No warning does not mean
+          safe.
+        </p>
+        <p className={P}>
+          Why an oxygen gate: O₂ concentration is the primary driver of flammability, so a strong match on material and
+          airflow must not &quot;cover&quot; a different atmosphere. NASA&apos;s candidate atmospheres step 21 → 26.5 → 30 → 34 % O₂;
+          a ±{O2_GATE_PTS} % pt tolerance keeps the best match inside your atmosphere class. O₂ partial pressure (O₂% ×
+          pressure) is shown for context and is not scored.
+        </p>
+        <p className={P}>
+          Robustness: scaling each weight by 0.8 and 1.2 (renormalised) across six engineering scenarios kept the top
+          match in 58 of 60 cases and the hazard decision in 60 of 60. The two changes are a near-tie (ACME BRE vs
+          SAFFIRE-II for Nomex at 34% O₂), both below the threshold. Reproduce with <span className={CODE}>npm run robustness</span>.
         </p>
       </section>
 
@@ -98,11 +110,12 @@ export default function Method({ bundle }: { bundle: Bundle }) {
       <section>
         <h2 className={H}>Use of SI</h2>
         <p className={P}>
-          The solution concept and product decisions are the team&apos;s own. Code was written with help from Claude
-          (Anthropic). Codex (OpenAI) reviewed the build plan and the app, and wrote the explanation and
-          numeric-check fixes. SI-assisted source files carry a header
-          comment, and the full disclosure is in the project README under &quot;Use of SI&quot;. Rankings and numbers are
-          computed deterministically from NASA&apos;s data; no SI model produces them.
+          Pratt (solo team) defined the problem, users, ranking factors, outputs and scope, made every design decision,
+          directed the AI assistants, reviewed their output and tested the app. Claude (Anthropic) wrote most of the
+          code and proposed options for Pratt&apos;s decision; Codex (OpenAI) independently reviewed the plan and app and
+          wrote the explanation and numeric-check hardening. SI-assisted source files carry a header comment; the full
+          disclosure is in the project README under &quot;Team and use of AI&quot;. This app runs no SI model: rankings and
+          numbers are computed deterministically from NASA&apos;s data.
         </p>
       </section>
     </footer>
