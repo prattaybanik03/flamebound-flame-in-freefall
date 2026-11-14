@@ -10,6 +10,7 @@ import { searchFromTarget } from "@/lib/url";
 interface BriefResponse {
   source: "si" | "fallback";
   model: string | null;
+  provider?: string | null;
   sentences: { text: string; cites: string[] }[];
   evidence: { id: string; label: string; doi: string; doiUrl: string; portalUrl: string }[];
   problems: string[];
@@ -74,7 +75,7 @@ export default function SiBriefing({ target }: { target: Target }) {
                 isSi ? "border-violet-600 bg-violet-500/15 text-violet-200" : "border-slate-600 text-slate-300"
               }`}
             >
-              {isSi ? `SI-generated · ${current.data.model} (Anthropic) · verified` : "Deterministic brief (no SI)"}
+              {isSi ? `SI-generated · ${current.data.model} · verified` : "Deterministic brief (no SI)"}
             </span>
             <span className="text-slate-400">{current.data.note}</span>
           </p>

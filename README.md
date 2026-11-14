@@ -7,7 +7,7 @@
   <img alt="Challenge: Flame in Freefall" src="https://img.shields.io/badge/challenge-Flame%20in%20Freefall-e8590c">
   <img alt="Melbourne Local Event" src="https://img.shields.io/badge/event-Melbourne-334155">
   <img alt="License: Apache-2.0" src="https://img.shields.io/badge/license-Apache--2.0-blue">
-  <img alt="Tests: 35 passing" src="https://img.shields.io/badge/tests-42%20passing-2f9e44">
+  <img alt="Tests: 49 passing" src="https://img.shields.io/badge/tests-49%20passing-2f9e44">
 </p>
 
 <p align="center">
@@ -40,7 +40,7 @@ Pick a mission atmosphere (ISS, lunar base or rover, exploration atmosphere, EVA
 | **Extrapolation Hazard** | Raised when coverage is weak, when the best match was tested in a different oxygen class, or when Moon or Mars gravity is selected. It lists the nearest recorded NASA conditions with exact differences |
 | **Regime maps** | Every relevant NASA record against the target crosshair. Flammability shows O₂ vs airflow; Suppression shows O₂ vs pressure, coloured by NASA's recorded outcome |
 | **Cited 1 g vs µg evidence** | For materials NASA tested both ways (SAFFIRE-II), the records side by side, with no conclusion drawn when the hazard is active |
-| **SI evidence briefing** | Claude Haiku summarises and interprets the top NASA records for the scenario. Every sentence must cite a record, every number must appear in NASA's data, and safety verdicts are rejected. Otherwise a labelled deterministic brief is shown |
+| **SI evidence briefing** | An SI model (Claude, ChatGPT, DeepSeek, Gemini or any OpenAI-compatible model) summarises and interprets the top NASA records for the scenario. Every sentence must cite a record, every number must appear in NASA's data, and safety verdicts are rejected. Otherwise a labelled deterministic brief is shown |
 | **Shareable scenarios** | The URL encodes the whole scenario, so a colleague or judge opens the exact view in one click |
 
 ![Regime map and cited 1 g vs microgravity evidence for silicone, with differences from the target](docs/images/screenshot-evidence.jpg)
@@ -55,14 +55,14 @@ flowchart LR
   D --> E["Browser engine<br/>bcms.ts · verdict.ts"]
   E --> F["UI<br/>hazard gate · evidence cards<br/>regime maps · cited 1 g vs µg"]
   D --> G["/api/brief (server)<br/>same ranking → evidence pack"]
-  G --> H["Claude Haiku<br/>summarise + interpret"]
+  G --> H["SI model, any provider<br/>summarise + interpret"]
   H --> I["Verification firewall<br/>citations · numbers · no verdicts"]
   I --> F
 ```
 
 - **Pipeline (Python).** Pulls every investigation and experimental table from NASA's public PSI API. It converts each condition to canonical units (O₂ % by volume, pressure in kPa, airflow in cm/s) through explicit, auditable column mappings. Every value gets a status: `recorded`, `approx`, `range`, `levels`, `footnote`, `not_recorded`, `unparsed` or `suspect`. See [docs/DATA.md](docs/DATA.md).
 - **Engine (TypeScript, in the browser).** Pure functions score, rank, gate and assemble evidence. Ranking is instant, works offline once loaded, and never calls an AI model.
-- **SI layer (server route, Claude Haiku).** The server recomputes the ranking from the canonical bundle. It sends the model only an evidence pack: the top active-pillar records with their verbatim NASA cells and the hazard reasons. The draft is accepted only if every sentence cites an evidence item, every number appears in the pack, and no safety verdict or recommendation is made. Otherwise the deterministic brief is shown, labelled as such. The API key never reaches the browser, and requests are cached and rate-limited.
+- **SI layer (server route, provider-agnostic).** The server recomputes the ranking from the canonical bundle. It sends the model only an evidence pack: the top active-pillar records with their verbatim NASA cells and the hazard reasons. The draft is accepted only if every sentence cites an evidence item, every number appears in the pack, and no safety verdict or recommendation is made. Otherwise the deterministic brief is shown, labelled as such. The API key never reaches the browser, and requests are cached and rate-limited. One adapter speaks the Anthropic Messages API and one speaks OpenAI-compatible Chat Completions, so the same app runs on Claude, ChatGPT, DeepSeek, Gemini, or any compatible endpoint (OpenRouter, Groq, Mistral, a local Ollama) by changing environment variables only. The briefing label always names the provider and model used.
 - **App (Next.js 16, deployed on Vercel).** A static page, one JSON data bundle and one server route. No tracking.
 
 ## Method
@@ -133,11 +133,25 @@ python scripts/build_app_data.py
 # Web app (Node 22+)
 cd web
 npm install
-cp .env.example .env.local   # optional: add ANTHROPIC_API_KEY for the SI briefing
-npm test               # 42 tests
+cp .env.example .env.local   # optional: add ONE key (Anthropic, OpenAI, DeepSeek or Gemini) for the SI briefing
+npm test               # 49 tests
 npm run robustness     # weight-sensitivity check
 npm run dev            # http://localhost:3000
 ```
+
+### Choosing the SI provider
+
+The SI briefing works with any of these. Set one key in `web/.env.local` (or in Vercel's environment variables); nothing else changes. With no key, the app shows a labelled deterministic brief instead.
+
+| Provider | Set | Default model |
+|---|---|---|
+| Anthropic (Claude) | `ANTHROPIC_API_KEY` | `claude-haiku-5-5` |
+| OpenAI (ChatGPT) | `OPENAI_API_KEY` | `gpt-5.4-mini` |
+| DeepSeek | `DEEPSEEK_API_KEY` | `deepseek-flash` |
+| Google Gemini | `GEMINI_API_KEY` | `gemini-3.8-flash` |
+| Any OpenAI-compatible endpoint | `SI_API_KEY` + `SI_BASE_URL` + `SI_MODEL` | (you choose) |
+
+`SI_MODEL` overrides any default. A single generic `SI_API_KEY` also works: the vendor is detected from the key prefix, and `SI_PROVIDER` settles ambiguous `sk-` keys (for example `SI_PROVIDER=deepseek`). Whichever model is used, its drafts pass the same citation, numeric and no-verdict checks. Set a spend limit on the provider account.
 
 ## Repository layout
 
@@ -145,7 +159,7 @@ npm run dev            # http://localhost:3000
 scripts/            Python data pipeline (fetch → canonical conditions → app bundle)
 data/               Processed NASA PSI data (raw API responses are regenerated, not committed)
 web/src/lib/        Scoring engine, hazard gate, cited-evidence logic, SI evidence pack + firewall, URL state
-web/src/app/api/    SI briefing route (server-side; Claude Haiku)
+web/src/app/api/    SI briefing route (server-side; any provider, see lib/provider.ts)
 web/src/components/ UI: controls, hazard banner, headline, regime map, evidence cards, method panel
 web/tests/          Node test-runner suites
 web/scripts/        Robustness check
@@ -167,13 +181,13 @@ docs/               Data pipeline notes and screenshots
 - **Codex (OpenAI)** independently reviewed the build plan and the app. It wrote the explanation-sentence and numeric-firewall hardening in `web/src/lib/explain.ts`, with its regression tests.
 - Every AI-assisted source file carries an `SI-assisted` header comment.
 - The Next.js scaffold came from `create-next-app` (not AI).
-- **In the live app, SI (Claude Haiku) writes the evidence briefing only.** It never ranks or scores. Each briefing is verified against the cited NASA records, or replaced by a labelled deterministic brief. Every ranking and score is computed deterministically from NASA's data.
+- **In the live app, an SI model writes the evidence briefing only.** It never ranks or scores. Each briefing is verified against the cited NASA records, or replaced by a labelled deterministic brief. Every ranking and score is computed deterministically from NASA's data.
 
 ## Data, references and licences
 
 - **Data:** NASA Physical Sciences Informatics, https://psi.nasa.gov, CC0-1.0. All 23 investigations are cited in the app by DOI; see [docs/DATA.md](docs/DATA.md).
 - **Challenge resources:** NASA Combustion Science; A Researcher's Guide to ISS Combustion Science; Apollo 1, Apollo 13 and Mir fire records; NASA spinoffs on firefighter air tanks, smoke detection and protective clothing.
-- **SI model:** Claude Haiku 5.5 (Anthropic), via the Claude API, for the evidence briefing.
+- **SI model:** configurable. Defaults: Claude Haiku 5.5 (Anthropic), GPT-5.4 mini (OpenAI), deepseek-flash (DeepSeek), Gemini 3.8 Flash (Google). The deployed demo's provider and model are shown on every SI briefing.
 - **Software:** Next.js and React (MIT), TypeScript (Apache-2.0), Tailwind CSS (MIT), ESLint (MIT), Python `requests` (Apache-2.0).
 - **Licence:** PyroVector's original code is released under the [Apache License 2.0](LICENSE); see also [NOTICE](NOTICE).
 - No NASA logos or branding are used. Use of NASA data does not imply NASA endorsement.
