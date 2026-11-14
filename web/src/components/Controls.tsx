@@ -106,7 +106,7 @@ export default function Controls({ target, onChange }: Props) {
             disabled
             aria-selected={false}
             aria-label="Detection (coming: SAME / SAME-R smoke data)"
-            className="cursor-not-allowed rounded-md bg-slate-800/50 px-3 py-1.5 text-sm font-medium text-slate-500"
+            className="cursor-not-allowed rounded-md bg-slate-800/50 px-3 py-1.5 text-sm font-medium text-slate-600"
           >
             Detection
           </button>

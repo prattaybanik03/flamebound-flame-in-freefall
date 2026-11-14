@@ -45,7 +45,7 @@ export default function SiBriefing({ target }: { target: Target }) {
   const isSi = current.data?.source === "si";
 
   return (
-    <section aria-label="SI evidence briefing" className="rounded-lg border border-violet-800/70 bg-violet-950/20 p-5">
+    <section aria-label="SI evidence briefing" className="rounded-lg border border-violet-800 bg-violet-950/60 p-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="text-lg font-semibold text-slate-100">SI evidence briefing</h2>
