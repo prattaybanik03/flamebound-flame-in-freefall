@@ -124,9 +124,13 @@ export default function FlameBound() {
         >
           {copied ? "Link copied" : "Copy scenario link"}
         </button>
-        <h1 className="text-3xl font-semibold tracking-tight">FlameBound</h1>
-        <p className="mt-2 max-w-3xl text-sm text-slate-400">
+        <div className="flex items-center gap-3">
+          <span className="ug-flame" aria-hidden="true" />
+          <h1 className="text-4xl leading-none text-slate-50">FlameBound</h1>
+        </div>
+        <p className="mt-3 max-w-3xl text-sm text-slate-400">
           NASA microgravity combustion investigations, matched to your habitat conditions and cited to their DOIs.
+          Without gravity, a candle flame burns as a dim blue sphere. FlameBound shows how far NASA&apos;s flight data covers your cabin.
         </p>
       </header>
 

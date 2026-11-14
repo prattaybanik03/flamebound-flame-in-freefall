@@ -67,13 +67,18 @@ export default function HazardBanner(props: {
     <section
       role={isHazard ? "alert" : "note"}
       aria-label={isHazard ? "Extrapolation hazard" : "Gravity note"}
-      className={`rounded-lg border p-4 ${
-        isHazard ? "border-red-800 bg-red-950/40" : "border-sky-800 bg-sky-950/40"
+      className={`rounded-lg border border-l-4 p-4 ${
+        isHazard ? "border-red-800 border-l-[#ff5a4f] bg-red-950/40" : "border-sky-800 border-l-sky-400 bg-sky-950/40"
       }`}
     >
-      <h2 className={`text-base font-semibold ${isHazard ? "text-red-300" : "text-sky-300"}`}>
-        {isHazard ? "Extrapolation hazard: no verdict from NASA data" : "Microgravity data only"}
-      </h2>
+      {isHazard ? (
+        <h2 className="flex flex-wrap items-center gap-3 text-lg text-red-200">
+          <span className="annunciator text-sm">EXTRAP HAZARD</span>
+          No verdict from NASA data
+        </h2>
+      ) : (
+        <h2 className="text-lg text-sky-300">Microgravity data only</h2>
+      )}
       <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-slate-200">
         {hazard.reasons.map((r) => (
           <li key={r}>{r}</li>

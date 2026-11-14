@@ -16,10 +16,10 @@ export default function Headline({ best, target }: { best: Scored | null; target
     <section aria-label="Best match" className="rounded-lg border border-slate-800 bg-slate-900/50 p-5">
       {best ? (
         <>
-          <p className="text-sm uppercase tracking-wide text-slate-400">Best {target.pillar} match</p>
+          <p className="text-sm text-slate-400">Best {target.pillar} match</p>
           <div className="mt-1 flex flex-wrap items-baseline gap-x-4 gap-y-1">
-            <span className="text-5xl font-semibold tabular-nums text-orange-300">{best.bcms}%</span>
-            <span className="text-lg font-medium text-slate-100">{best.investigation.acronym}</span>
+            <span className="font-display text-6xl leading-none tabular-nums text-orange-300">{best.bcms}%</span>
+            <span className="font-display text-2xl text-slate-100">{best.investigation.acronym}</span>
             <span className="font-mono text-sm text-slate-400">{best.record.ref}</span>
           </div>
           <p className="mt-1 text-sm text-slate-300">{best.investigation.title}</p>

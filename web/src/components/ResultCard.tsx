@@ -113,7 +113,7 @@ export default function ResultCard({ scored, rank, next, target }: { scored: Sco
             <p className="mt-0.5 text-sm text-slate-400">{inv.title}</p>
           </div>
           <div className="text-right">
-            <div className="text-3xl font-semibold tabular-nums text-orange-300">{scored.bcms}%</div>
+            <div className="font-display text-4xl leading-none tabular-nums text-orange-300">{scored.bcms}%</div>
             <div className="text-xs text-slate-500">BCMS</div>
           </div>
         </header>

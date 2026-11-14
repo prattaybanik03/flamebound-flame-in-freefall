@@ -1,16 +1,77 @@
 /* SI-assisted: drafted with Claude (Anthropic); reviewed by the team. */
 @import "tailwindcss";
 
+/*
+ * FlameBound visual system: a flight-rated instrument panel lit by a microgravity flame.
+ * In microgravity, flames burn as dim blue spheres (no buoyant soot plume), so "µg flame blue"
+ * is the accent. Amber marks 1 g and caution; red is reserved for the hazard annunciator.
+ * Everything is static CSS: no canvas, no blur, one compositor-only animation on the logo mark.
+ */
+
+@font-face {
+  font-family: "Barlow";
+  src: url("/fonts/barlow-latin-400-normal.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Barlow";
+  src: url("/fonts/barlow-latin-600-normal.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Barlow Condensed";
+  src: url("/fonts/barlow-condensed-latin-600-normal.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   color-scheme: dark;
-  --background: #020617; /* slate-950 */
-  --foreground: #f1f5f9; /* slate-100 */
+  --background: #050913; /* deep space */
+  --foreground: #e6ecf5;
+  --flame: #5ab8ff;      /* µg flame blue */
+  --ember: #ffb547;      /* 1 g flame / caution */
+  --alarm: #ff5a4f;      /* hazard annunciator */
+}
+
+/* Re-tune the existing utility palettes so every component picks up the system without rewrites:
+   slate becomes a cool "orbit" grey, orange becomes µg flame blue. */
+@theme {
+  --color-slate-50: #f3f6fb;
+  --color-slate-100: #e6ecf5;
+  --color-slate-200: #ccd6e6;
+  --color-slate-300: #a9b6cc;
+  --color-slate-400: #8796b0;
+  --color-slate-500: #657591;
+  --color-slate-600: #485872;
+  --color-slate-700: #2f3d56;
+  --color-slate-800: #1c2740;
+  --color-slate-900: #0f1829;
+  --color-slate-950: #060b16;
+
+  --color-orange-50: #eaf6ff;
+  --color-orange-100: #d3ecff;
+  --color-orange-200: #a8d9ff;
+  --color-orange-300: #7cc6ff;
+  --color-orange-400: #4fb0ff;
+  --color-orange-500: #2e97f5;
+  --color-orange-600: #1e78d1;
+  --color-orange-700: #1a5ea6;
+  --color-orange-800: #194d84;
+  --color-orange-900: #183f6a;
+  --color-orange-950: #0e2742;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-sans: "Barlow", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --font-display: "Barlow Condensed", "Barlow", system-ui, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 
@@ -18,4 +79,91 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Static starfield and a faint lunar-limb glow, painted once on a fixed layer behind the app. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(120% 60% at 50% -38%, rgba(90, 184, 255, 0.16), rgba(90, 184, 255, 0.04) 55%, transparent 70%),
+    radial-gradient(1px 1px at 12% 18%, rgba(230, 236, 245, 0.55), transparent 60%),
+    radial-gradient(1px 1px at 27% 64%, rgba(230, 236, 245, 0.35), transparent 60%),
+    radial-gradient(1.5px 1.5px at 41% 31%, rgba(230, 236, 245, 0.5), transparent 60%),
+    radial-gradient(1px 1px at 58% 82%, rgba(230, 236, 245, 0.3), transparent 60%),
+    radial-gradient(1px 1px at 66% 12%, rgba(230, 236, 245, 0.45), transparent 60%),
+    radial-gradient(1.5px 1.5px at 79% 47%, rgba(168, 217, 255, 0.5), transparent 60%),
+    radial-gradient(1px 1px at 88% 71%, rgba(230, 236, 245, 0.35), transparent 60%),
+    radial-gradient(1px 1px at 94% 24%, rgba(230, 236, 245, 0.4), transparent 60%),
+    radial-gradient(1px 1px at 6% 88%, rgba(230, 236, 245, 0.3), transparent 60%),
+    radial-gradient(1px 1px at 35% 93%, rgba(230, 236, 245, 0.25), transparent 60%),
+    var(--background);
+  background-size: 100% 100%;
+}
+body::after {
+  /* A second, sparser star layer tiled across the page for depth. */
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    radial-gradient(1px 1px at 20px 30px, rgba(230, 236, 245, 0.28), transparent 60%),
+    radial-gradient(1px 1px at 140px 90px, rgba(230, 236, 245, 0.18), transparent 60%),
+    radial-gradient(1px 1px at 230px 180px, rgba(168, 217, 255, 0.22), transparent 60%);
+  background-size: 260px 220px;
+}
+
+/* The FlameBound mark: a microgravity flame, a soft blue sphere with a brighter base. */
+.ug-flame {
+  position: relative;
+  display: inline-block;
+  width: 2.1rem;
+  height: 2.1rem;
+  border-radius: 9999px;
+  background:
+    radial-gradient(circle at 50% 62%, rgba(255, 255, 255, 0.9) 0 7%, rgba(168, 217, 255, 0.85) 16%, transparent 34%),
+    radial-gradient(circle at 50% 55%, rgba(90, 184, 255, 0.95) 0 30%, rgba(46, 151, 245, 0.55) 52%, rgba(46, 151, 245, 0) 72%);
+  box-shadow: 0 0 18px 4px rgba(90, 184, 255, 0.35);
+  animation: ug-breathe 4.8s ease-in-out infinite;
+  flex: none;
+}
+@keyframes ug-breathe {
+  0%, 100% { transform: scale(1); opacity: 0.92; }
+  50% { transform: scale(1.06); opacity: 1; }
+}
+
+/* Caution & warning annunciator: a lit legend panel, as on spacecraft C&W consoles. */
+.annunciator {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: 1px solid rgba(255, 90, 79, 0.75);
+  border-radius: 3px;
+  background: linear-gradient(180deg, rgba(255, 90, 79, 0.28), rgba(255, 90, 79, 0.14));
+  box-shadow: 0 0 14px rgba(255, 90, 79, 0.35), inset 0 0 8px rgba(255, 90, 79, 0.25);
+  padding: 0.2rem 0.6rem;
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: #ffd9d6;
+}
+
+h1, h2, h3, .font-display {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+:focus-visible {
+  outline: 2px solid var(--flame);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ug-flame { animation: none; }
 }

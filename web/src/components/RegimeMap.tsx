@@ -15,10 +15,10 @@ const mid = (c: Condition): number | null => {
 };
 
 const OUTCOME_COLOR: Record<string, string> = {
-  extinguished: "#38bdf8",
+  extinguished: "#5ab8ff",
   disruption: "#f97316",
   self_extinguished: "#a78bfa",
-  flow_terminated: "#94a3b8",
+  flow_terminated: "#8796b0",
   cool_flame: "#22d3ee",
   other: "#facc15",
 };
@@ -71,7 +71,7 @@ export default function RegimeMap({
         const x = mid(r.pressure);
         if (x === null) continue;
         const cat = r.outcome?.category ?? "";
-        const color = OUTCOME_COLOR[cat] ?? "#64748b";
+        const color = OUTCOME_COLOR[cat] ?? "#657591";
         legend.set(OUTCOME_LABEL[cat] ?? NO_CATEGORY, color);
         pts.push({ r, inv, x, y, color, label: inv.acronym, xr: extent(r.pressure), yr: extent(r.o2) });
       }
@@ -108,24 +108,24 @@ export default function RegimeMap({
         aria-label={flam ? "Oxygen versus airflow for NASA flammability records" : "Oxygen versus pressure for NASA suppression records"}>
         {flam && (
           <g>
-            <rect x={8} y={T} width={L - 24} height={H - T - B} rx={6} fill="#0f172a" stroke="#1e293b" />
-            <text x={(L - 16) / 2 + 4} y={H - B + 14} textAnchor="middle" fontSize={10} fill="#94a3b8">airflow</text>
-            <text x={(L - 16) / 2 + 4} y={H - B + 26} textAnchor="middle" fontSize={10} fill="#94a3b8">not in cm/s</text>
+            <rect x={8} y={T} width={L - 24} height={H - T - B} rx={6} fill="#0f1829" stroke="#1c2740" />
+            <text x={(L - 16) / 2 + 4} y={H - B + 14} textAnchor="middle" fontSize={10} fill="#8796b0">airflow</text>
+            <text x={(L - 16) / 2 + 4} y={H - B + 26} textAnchor="middle" fontSize={10} fill="#8796b0">not in cm/s</text>
           </g>
         )}
         {yTicks.map((v) => (
           <g key={`y${v}`}>
-            <line x1={L} x2={W - R} y1={Y(v)} y2={Y(v)} stroke="#1e293b" />
-            <text x={L - 6} y={Y(v) + 4} textAnchor="end" fontSize={10} fill="#94a3b8">{v}%</text>
+            <line x1={L} x2={W - R} y1={Y(v)} y2={Y(v)} stroke="#1c2740" />
+            <text x={L - 6} y={Y(v) + 4} textAnchor="end" fontSize={10} fill="#8796b0">{v}%</text>
           </g>
         ))}
         {xTicks.filter((v) => v <= xMax).map((v) => (
           <g key={`x${v}`}>
-            <line x1={X(v)} x2={X(v)} y1={T} y2={H - B} stroke="#1e293b" />
-            <text x={X(v)} y={H - B + 14} textAnchor="middle" fontSize={10} fill="#94a3b8">{v}</text>
+            <line x1={X(v)} x2={X(v)} y1={T} y2={H - B} stroke="#1c2740" />
+            <text x={X(v)} y={H - B + 14} textAnchor="middle" fontSize={10} fill="#8796b0">{v}</text>
           </g>
         ))}
-        <text x={(L + W - R) / 2} y={H - 6} textAnchor="middle" fontSize={11} fill="#cbd5e1">
+        <text x={(L + W - R) / 2} y={H - 6} textAnchor="middle" fontSize={11} fill="#ccd6e6">
           {flam ? "Airflow (cm/s)" : "Pressure (kPa)"}
         </text>
         {pts.map((p) => {
@@ -146,9 +146,9 @@ export default function RegimeMap({
         })}
         {/* target crosshair */}
         <g pointerEvents="none">
-          <line x1={X(tx)} x2={X(tx)} y1={T} y2={H - B} stroke="#f43f5e" strokeDasharray="4 4" />
-          <line x1={L} x2={W - R} y1={Y(target.o2Pct)} y2={Y(target.o2Pct)} stroke="#f43f5e" strokeDasharray="4 4" />
-          <circle cx={X(tx)} cy={Y(target.o2Pct)} r={7} fill="none" stroke="#f43f5e" strokeWidth={2} />
+          <line x1={X(tx)} x2={X(tx)} y1={T} y2={H - B} stroke="#ff5a4f" strokeDasharray="4 4" />
+          <line x1={L} x2={W - R} y1={Y(target.o2Pct)} y2={Y(target.o2Pct)} stroke="#ff5a4f" strokeDasharray="4 4" />
+          <circle cx={X(tx)} cy={Y(target.o2Pct)} r={7} fill="none" stroke="#ff5a4f" strokeWidth={2} />
         </g>
       </svg>
       <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-300">
