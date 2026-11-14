@@ -1,8 +1,77 @@
-# Flame in Freefall: NASA Space Apps 2026 (Melbourne)
+# PyroVector
 
-Challenge: [Flame in Freefall: SI-Powered Fire Safety Insights from Microgravity Combustion Data](https://www.spaceappschallenge.org/2026/challenges/flame-in-freefall/)
+**Turning 23 NASA microgravity combustion investigations into boundary-matched, DOI-verified fire safety envelopes for spacecraft habitat engineers.**
 
-## Data
+NASA Space Apps Challenge 2026 · Melbourne Local Event · Challenge: [Flame in Freefall: SI-Powered Fire Safety Insights from Microgravity Combustion Data](https://www.spaceappschallenge.org/2026/challenges/flame-in-freefall/)
+
+**Live app:** _URL added at deployment_
+
+## What it does
+
+An aerospace engineer is qualifying a cabin material for a crewed habitat. Typical cases are a lunar base or pressurised rover at about 30% O₂ and 10.2 psi, or an exploration atmosphere at 34% O₂ and 8.2 psi. The question is whether NASA's microgravity fire experiments actually cover that atmosphere, that airflow and that material.
+
+PyroVector answers that from NASA's own data:
+
+1. **Pick a mission atmosphere** (or set O₂, pressure and airflow), a material or fuel, and a safety pillar: Flammability or Suppression.
+2. **Every NASA PSI record is scored** with a deterministic Boundary Condition Match Score (BCMS, 0–100). The score shows how closely that record's recorded conditions match the target. Each result card breaks the score into O₂, material, airflow, pressure and pillar/scale. It shows NASA's verbatim cell and column next to each converted value, and links the investigation's DOI.
+3. **Gaps are shown, not hidden.** When NASA never recorded a condition, it contributes zero; nothing is guessed. When the best match in the chosen pillar is below 65%, or partial gravity is selected, an Extrapolation Hazard banner appears. It lists the nearest recorded NASA conditions, with exact differences, and notes that partial-gravity data is expected from NASA's LUCI and FM2 experiments.
+4. **Cited 1 g vs microgravity evidence.** For materials NASA tested in both 1 g and microgravity (SAFFIRE-II), the app shows those records verbatim, with their differences from the target. When the hazard is active, it draws no conclusion about the engineer's cabin.
+5. **Regime maps** plot every relevant NASA record against the target. Flammability shows O₂ vs airflow; Suppression shows O₂ vs pressure, coloured by NASA's recorded outcome.
+
+**BCMS measures data coverage, not fire safety.** No warning does not mean safe.
+
+## Method
+
+```text
+BCMS = 100 × Σ (weight × sub-score), over the dimensions NASA recorded
+O₂ 30%:        exp(−|ΔO₂| / 15)    Δ in % points
+Material 25%:  exact 1.0 · calibrated condensed-fuel surrogate 0.9 · same fuel phase 0.75 · other 0.4
+Airflow 20%:   exp(−|ΔV| / 15)     Δ in cm/s
+Pressure 15%:  exp(−|ΔP| / 50)     Δ in kPa
+Pillar 10%:    same pillar full-scale 1.0 · same pillar chamber 0.8 · other 0.3
+```
+
+- A dimension NASA did not record contributes 0: no re-weighting and no guessing. Solid-material tables (SAFFIRE, BASS, BASS-II) never recorded pressure, so they cap at 85%.
+- Ranges match anywhere inside the range. Discrete levels match only the listed levels, never the span between them.
+- Each investigation is represented by its best-matching record.
+- FLEX-2's planned condition envelopes are context only and are never ranked.
+- Values that are physically implausible in the source (known NASA table typos) are withheld and flagged.
+- Weights, the 0.4 / 0.3 fallbacks and the 65% threshold are provisional design choices, documented in the app's method panel.
+
+Rankings and every number shown are computed deterministically in the browser from NASA's data. No SI model produces or reorders them.
+
+## Known limits
+
+- PSI has no partial-gravity combustion data. Microgravity results are not lunar or Martian results.
+- Solid-material flammability tables don't record pressure. BASS-II logged airflow as fan settings, not cm/s.
+- The Detection pillar (SAME / SAME-R smoke data) is not yet included.
+- Thickness and flow direction are shown for comparison and are not scored. Gravity drives the hazard warning only.
+
+## Run it
+
+```bash
+# data pipeline (Python 3.10+)
+pip install -r requirements.txt
+python scripts/fetch_psi.py          # pull NASA PSI investigations and experimental tables
+python scripts/build_conditions.py   # canonical conditions with per-value status
+python scripts/build_app_data.py     # web/public/data/pyrovector.json
+
+# web app (Node 22+)
+cd web
+npm install
+npm test
+npm run dev                          # http://localhost:3000
+```
+
+## References and licences
+
+- **Data:** NASA Physical Sciences Informatics (PSI), https://psi.nasa.gov, CC0-1.0. Each investigation is cited in the app by its DOI.
+- **Background (challenge resources):** NASA combustion science; A Researcher's Guide to ISS Combustion Science; Apollo 1, Apollo 13 and Mir fire records; NASA spinoffs on firefighter air tanks, smoke detection and protective clothing.
+- **Software:** Next.js and React (MIT), Tailwind CSS (MIT), TypeScript (Apache-2.0), Python `requests` (Apache-2.0). Scaffold generated with `create-next-app`.
+- No NASA logos or branding are used.
+
+
+## Data pipeline details
 
 All data comes from NASA's [Physical Sciences Informatics (PSI)](https://psi.nasa.gov/physci/repo/search?q=combustion) repository. Records are licensed CC0-1.0. Cite each investigation by its DOI, as PSI requests.
 

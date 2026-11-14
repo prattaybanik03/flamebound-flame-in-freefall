@@ -29,3 +29,6 @@ agents/
 *.pfx
 secrets/
 credentials*.json
+
+# Local downloads / scratch
+Claude outputs/
