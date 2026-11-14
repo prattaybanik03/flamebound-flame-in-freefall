@@ -27,6 +27,7 @@ test("each vendor key selects its vendor and default model", () => {
 test("a generic SI_API_KEY is routed by its prefix", () => {
   assert.equal(detectFromKey("sk-ant-api03-x"), "anthropic");
   assert.equal(detectFromKey("AIzaSyX"), "gemini");
+  assert.equal(detectFromKey("AQ.Ab8RN6x"), "gemini");
   assert.equal(detectFromKey("sk-proj-x"), "openai");
   assert.equal(cfgOf({ SI_API_KEY: "sk-ant-x" }).id, "anthropic");
 });

@@ -50,7 +50,7 @@ const ALIASES: Record<string, ProviderId> = {
 /** Guess the vendor from the key's shape. Plain `sk-` keys are shared by OpenAI and DeepSeek, so they default to OpenAI. */
 export function detectFromKey(key: string): Exclude<ProviderId, "custom"> {
   if (key.startsWith("sk-ant-")) return "anthropic";
-  if (key.startsWith("AIza")) return "gemini";
+  if (key.startsWith("AIza") || key.startsWith("AQ.")) return "gemini"; // legacy and current Google AI Studio key formats
   return "openai";
 }
 
