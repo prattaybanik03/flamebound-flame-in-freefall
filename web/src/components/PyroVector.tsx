@@ -9,6 +9,7 @@ import { hazard as computeHazard, rank, scoreRecord } from "@/lib/bcms";
 import { buildVerdict } from "@/lib/verdict";
 import VerdictCard from "./VerdictCard";
 import RegimeMap from "./RegimeMap";
+import Method from "./Method";
 import Controls from "./Controls";
 import Headline from "./Headline";
 import HazardBanner from "./HazardBanner";
@@ -141,10 +142,7 @@ export default function PyroVector() {
               </>
             )}
           </section>
-          <p className="text-sm text-slate-400">
-            {bundle.investigations.length} investigations · {bundle.records.length.toLocaleString("en-AU")} records ·
-            data snapshot {bundle.builtOn}
-          </p>
+          <Method bundle={bundle} />
         </>
       )}
     </main>
