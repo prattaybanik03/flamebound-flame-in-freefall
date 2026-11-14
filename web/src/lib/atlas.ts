@@ -26,6 +26,8 @@ export interface AtlasCell {
   /** Target O2 minus the best match's nearest recorded O2, in % points: positive means the target is above NASA's value. */
   dO2: number | null;
   pressureRecorded: boolean;
+  /** True when the closest record tests this very material (not just a similar solid). */
+  exactMaterial: boolean;
 }
 
 type Ranked = { investigation: { acronym: string; pillar: string }; record: { ref: string; material: string; o2: { raw: string; min: number | null; max: number | null; levels: number[] } }; bcms: number; components: { dim: string; delta: number | null; score: number | null }[] }[];
@@ -54,25 +56,33 @@ export function signedO2Gap(target: number, o2: { min: number | null; max: numbe
  *  recomputes it from the data at both airflows and fails if the engine ever disagrees. */
 export const HEADLINE = { issCovered: 8, issTotal: 8, artemisCovered: 0, artemisTotal: 24 };
 
+/** One configuration: the closest NASA flammability record and how well it covers the target. */
+export function atlasCell(bundle: Bundle, engine: Engine, atmosphere: Atmosphere, materialKey: string, flowCmS: number): AtlasCell | null {
+  const target = atlasTarget(atmosphere, materialKey, flowCmS);
+  const ranked = engine.rank(bundle.records, bundle.investigations, target);
+  const best = ranked.find((s) => s.investigation.pillar === "flammability");
+  if (!best) return null;
+  const o2 = best.components.find((c) => c.dim === "o2");
+  const p = best.components.find((c) => c.dim === "pressure");
+  const m = best.components.find((c) => c.dim === "material");
+  const covered = engine.hazard(ranked as never[], target)?.level !== "hazard";
+  const nearestO2 = o2?.delta === null || o2?.delta === undefined ? null : signedO2Gap(target.o2Pct, best.record.o2);
+  return {
+    atmosphere, materialKey, flowCmS, target, bcms: best.bcms, covered,
+    best: { acronym: best.investigation.acronym, ref: best.record.ref, o2Raw: best.record.o2.raw, material: best.record.material },
+    dO2: nearestO2,
+    pressureRecorded: p?.score !== null && p?.score !== undefined,
+    exactMaterial: m?.score === 1,
+  };
+}
+
 export function computeAtlas(bundle: Bundle, engine: Engine): AtlasCell[] {
   const cells: AtlasCell[] = [];
   for (const flowCmS of ATLAS_FLOWS) {
     for (const materialKey of ATLAS_MATERIALS) {
       for (const atmosphere of ATMOSPHERES) {
-        const target = atlasTarget(atmosphere, materialKey, flowCmS);
-        const ranked = engine.rank(bundle.records, bundle.investigations, target);
-        const best = ranked.find((s) => s.investigation.pillar === "flammability");
-        if (!best) continue;
-        const o2 = best.components.find((c) => c.dim === "o2");
-        const p = best.components.find((c) => c.dim === "pressure");
-        const covered = engine.hazard(ranked as never[], target)?.level !== "hazard";
-        const nearestO2 = o2?.delta === null || o2?.delta === undefined ? null : signedO2Gap(target.o2Pct, best.record.o2);
-        cells.push({
-          atmosphere, materialKey, flowCmS, target, bcms: best.bcms, covered,
-          best: { acronym: best.investigation.acronym, ref: best.record.ref, o2Raw: best.record.o2.raw, material: best.record.material },
-          dO2: nearestO2,
-          pressureRecorded: p?.score !== null && p?.score !== undefined,
-        });
+        const cell = atlasCell(bundle, engine, atmosphere, materialKey, flowCmS);
+        if (cell) cells.push(cell);
       }
     }
   }

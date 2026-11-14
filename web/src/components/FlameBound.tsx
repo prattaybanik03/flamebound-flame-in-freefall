@@ -22,6 +22,7 @@ import ReportButtons from "./ReportButtons";
 import DetectionView from "./DetectionView";
 import AskRecords from "./AskRecords";
 import GapAtlas from "./GapAtlas";
+import MaterialsChecker from "./MaterialsChecker";
 import { HEADLINE } from "@/lib/atlas";
 
 const DATA_URL = "/data/flamebound.json";
@@ -155,6 +156,12 @@ export default function FlameBound() {
             Evidence gaps
           </a>
           <a
+            href="#materials"
+            className="rounded-md border border-slate-700 px-3 py-1.5 text-xs text-slate-200 hover:border-orange-400 hover:text-orange-200"
+          >
+            Check your materials
+          </a>
+          <a
             href="#ask"
             className="rounded-md border border-slate-700 px-3 py-1.5 text-xs text-slate-200 hover:border-orange-400 hover:text-orange-200"
           >
@@ -239,6 +246,13 @@ export default function FlameBound() {
             </>
           )}
           <GapAtlas
+            bundle={bundle}
+            onOpen={(t) => {
+              setTarget(t);
+              document.getElementById("scenario")?.scrollIntoView();
+            }}
+          />
+          <MaterialsChecker
             bundle={bundle}
             onOpen={(t) => {
               setTarget(t);
