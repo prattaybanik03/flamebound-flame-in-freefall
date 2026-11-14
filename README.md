@@ -11,7 +11,7 @@
 </p>
 
 <p align="center">
-  <strong>Live app:</strong> <em>link added at deployment</em> ·
+  <strong>Live app:</strong> <a href="https://flamebound-flame-in-freefall.vercel.app/">flamebound-flame-in-freefall.vercel.app</a> · <a href="https://flamebound-flame-in-freefall.vercel.app/?pillar=flammability&o2=30&kpa=70.3&flow=5&dir=concurrent&mat=pmma&g=0">Try the lunar-base hazard case</a> ·
   <a href="https://www.spaceappschallenge.org/2026/challenges/flame-in-freefall/">Challenge statement</a> ·
   <a href="#method">Method</a> ·
   <a href="#validation">Validation</a>
