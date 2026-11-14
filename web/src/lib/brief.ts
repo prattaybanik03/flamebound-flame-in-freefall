@@ -98,7 +98,9 @@ export function buildEvidence(
 export const SYSTEM_PROMPT = [
   "You assist a spacecraft fire-safety engineer. You summarise and interpret NASA microgravity combustion evidence.",
   "Use ONLY the evidence pack in the user message. Do not use outside knowledge.",
-  "Write 3 to 5 sentences of plain English. End EVERY sentence with one or more citations in square brackets, e.g. [E1] or [E1][E2].",
+  "Write 3 to 5 sentences of plain English prose: no headings, lists, bold or preamble.",
+  "End EVERY sentence, including the first, with one or more citations in square brackets placed before the full stop, e.g. \"... [E1].\" or \"... [E1][E2].\" A sentence about the hazard cites the evidence item it concerns.",
+  "In the prose, name records by investigation and record ID (e.g. \"SAFFIRE-II 2-7\"); use E-labels only inside the citation brackets.",
   "Only use numbers that appear in the evidence pack, copied exactly. Never compute, convert or round numbers.",
   "If the hazard list is not empty, your first sentence must say that NASA's data does not closely cover the engineer's conditions, and why.",
   "Describe what NASA tested and observed, how it differs from the engineer's target, and what is missing.",
@@ -107,6 +109,11 @@ export const SYSTEM_PROMPT = [
 
 export function buildUserMessage(pack: EvidencePack): string {
   return `Evidence pack (JSON):\n${JSON.stringify(pack)}\n\nWrite the briefing now.`;
+}
+
+/** Second-turn request after a rejected draft: names each problem so the model can fix exactly those. */
+export function correctionMessage(problems: string[]): string {
+  return `Your briefing failed automatic verification:\n- ${problems.join("\n- ")}\nRewrite it to fix every problem, following all the original rules. Reply with the briefing only.`;
 }
 
 export interface Sentence { text: string; cites: string[] }
@@ -118,7 +125,9 @@ const VERDICT = /\b(is|are|would be|will be|remains?)\s+(safe|unsafe)\b|\bcertif
 /** Split model text into sentences with their citations. */
 export function splitSentences(text: string): Sentence[] {
   const clean = text.replace(/\s+/g, " ").trim();
-  const parts = clean.match(/[^.!?]+[.!?]+(?:\s*(?:\[E\d+\]\s*)+)?|[^.!?]+$/g) ?? [];
+  // A sentence ends at . ! or ? (plus any trailing citations) followed by whitespace and a capital letter,
+  // quote, parenthesis or digit. Decimal points ("60.1%") and "e.g." are not followed by whitespace + capital.
+  const parts = clean.split(/(?<=[.!?](?:\s*\[E\d+\])*)\s+(?=[A-Z0-9"'(])/);
   return parts
     .map((p) => p.trim())
     .filter((p) => p.length > 0)

@@ -7,7 +7,7 @@
   <img alt="Challenge: Flame in Freefall" src="https://img.shields.io/badge/challenge-Flame%20in%20Freefall-e8590c">
   <img alt="Melbourne Local Event" src="https://img.shields.io/badge/event-Melbourne-334155">
   <img alt="License: Apache-2.0" src="https://img.shields.io/badge/license-Apache--2.0-blue">
-  <img alt="Tests: 49 passing" src="https://img.shields.io/badge/tests-49%20passing-2f9e44">
+  <img alt="Tests: 52 passing" src="https://img.shields.io/badge/tests-52%20passing-2f9e44">
 </p>
 
 <p align="center">
@@ -99,8 +99,9 @@ While it is active, no conclusion is drawn about the engineer's cabin.
 
 | Check | Result |
 | --- | --- |
-| Automated tests (`npm test`) | 42 passing: scoring rules, missing-data handling, levels and ranges, the O₂ gate, verdict gating, explanation wording, URL round trips, and the SI firewall (uncited sentences, invented numbers, unknown citations, safety verdicts, hazard-first wording) |
+| Automated tests (`npm test`) | 52 passing: scoring rules, missing-data handling, levels and ranges, the O₂ gate, verdict gating, explanation wording, URL round trips, and the SI firewall (uncited sentences, invented numbers, unknown citations, safety verdicts, hazard-first wording, sentence splitting around decimals), and provider routing and request formats for Anthropic and OpenAI-compatible APIs |
 | Weight robustness (`npm run robustness`) | Each weight ×0.8 and ×1.2 (renormalised), 6 scenarios, 60 runs. Top match unchanged in **58/60**, top-3 order in 55/60, hazard decision in **60/60**. The two changes are a near-tie (ACME BRE 60.5% vs SAFFIRE-II 58.8%, Nomex at 34% O₂), both below the threshold either way |
+| SI briefing, live model (Claude Haiku 5.5, effort `low`) | 7 of 7 acceptance scenarios produced a briefing that passed the firewall (6–10 s each). Each was read against its NASA records: hazards stated first, every number traceable to a NASA cell, no safety verdicts. A draft that fails verification gets one correction attempt with its specific problems; if that fails too, the labelled deterministic brief is shown |
 | Type-check and lint | `tsc` and ESLint clean |
 | Data integrity | No number is shown that is not either a NASA cell (verbatim, with its column) or a published formula result. Physically implausible source values (known table typos) are withheld and flagged |
 
@@ -134,7 +135,7 @@ python scripts/build_app_data.py
 cd web
 npm install
 cp .env.example .env.local   # optional: add ONE key (Anthropic, OpenAI, DeepSeek or Gemini) for the SI briefing
-npm test               # 49 tests
+npm test               # 52 tests
 npm run robustness     # weight-sensitivity check
 npm run dev            # http://localhost:3000
 ```

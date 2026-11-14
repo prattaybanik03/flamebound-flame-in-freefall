@@ -1,7 +1,7 @@
 // SI-assisted: drafted with Claude (Anthropic); reviewed by the team.
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { buildRequest, detectFromKey, extractText, resolveProvider } from "../src/lib/provider.ts";
+import { buildRequest, describeResponse, detectFromKey, extractText, resolveProvider } from "../src/lib/provider.ts";
 
 const cfgOf = (env: Record<string, string>) => {
   const r = resolveProvider(env);
@@ -56,6 +56,10 @@ test("requests use the right wire format and keep the key out of the body", () =
   assert.equal(a.url, "https://api.anthropic.com/v1/messages");
   assert.equal(a.headers["x-api-key"], "secret");
   assert.equal(a.body.system, "SYS");
+  assert.deepEqual(a.body.output_config, { effort: "low" });
+  assert.ok((a.body.max_tokens as number) >= 2000, "room for thinking");
+  const noEffort = buildRequest(cfgOf({ ANTHROPIC_API_KEY: "k" }), "S", "U", { effort: "none" });
+  assert.ok(!("output_config" in noEffort.body));
   const d = buildRequest(cfgOf({ DEEPSEEK_API_KEY: "secret" }), "SYS", "USER");
   assert.equal(d.url, "https://api.deepseek.com/chat/completions");
   assert.equal(d.headers.authorization, "Bearer secret");
@@ -64,6 +68,19 @@ test("requests use the right wire format and keep the key out of the body", () =
   const o = buildRequest(cfgOf({ OPENAI_API_KEY: "secret" }), "SYS", "USER");
   assert.ok("max_completion_tokens" in o.body && !("max_tokens" in o.body));
   for (const r of [a, d, o]) assert.ok(!JSON.stringify(r.body).includes("secret"));
+});
+
+test("an empty answer is diagnosed without exposing content", () => {
+  assert.equal(describeResponse("anthropic", { stop_reason: "max_tokens", content: [{ type: "thinking", thinking: "secret" }] }), "stop_reason max_tokens; blocks thinking");
+  assert.ok(!describeResponse("anthropic", { content: [{ type: "text", text: "secret" }] }).includes("secret"));
+});
+
+test("a correction retry is sent as a second turn in both wire formats", () => {
+  const retry = { draft: "D", feedback: "F" };
+  for (const env of [{ ANTHROPIC_API_KEY: "k" }, { DEEPSEEK_API_KEY: "k" }]) {
+    const msgs = buildRequest(cfgOf(env), "S", "U", { retry }).body.messages as { role: string; content: string }[];
+    assert.deepEqual(msgs.filter((m) => m.role !== "system").map((m) => `${m.role}:${m.content}`), ["user:U", "assistant:D", "user:F"]);
+  }
 });
 
 test("answer text is extracted from both response shapes", () => {

@@ -63,3 +63,10 @@ test("sentence splitter keeps trailing citations with their sentence", () => {
   assert.equal(s.length, 2);
   assert.deepEqual(s[1].cites, ["E1", "E2"]);
 });
+
+test("decimals and trailing citations do not split sentences", () => {
+  const s = splitSentences("SAFFIRE-II 2-7 scores 60.1% BCMS at ~ 22.1% O2 [E1]. NASA did not record pressure, e.g. for BASS-II [E2][E3]. Coverage is 85% [E1].");
+  assert.equal(s.length, 3);
+  assert.deepEqual(s.map((x) => x.cites), [["E1"], ["E2", "E3"], ["E1"]]);
+  assert.equal(splitSentences("One sentence. [E1] Two sentence [E2].").length, 2);
+});

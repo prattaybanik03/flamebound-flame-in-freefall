@@ -118,17 +118,30 @@ export interface WireRequest {
 }
 
 /** Build the HTTP request for one briefing. Token caps leave room for models that reason before answering. */
-export function buildRequest(cfg: ProviderConfig, system: string, user: string, anthropicVersion = "2023-06-01"): WireRequest {
+export interface RequestOptions {
+  anthropicVersion?: string;
+  /** Anthropic effort level (low | medium | high | xhigh | max), or "none" to omit it for models without effort support. */
+  effort?: string;
+  /** A rejected draft and the correction request, sent as a second turn. */
+  retry?: { draft: string; feedback: string };
+}
+
+export function buildRequest(cfg: ProviderConfig, system: string, user: string, opts: RequestOptions = {}): WireRequest {
   if (cfg.wire === "anthropic") {
+    // Current Claude models think by default and thinking counts toward max_tokens, so leave room for it.
+    // Low effort keeps that thinking short (a 3-5 sentence brief does not need more), which cuts cost and latency.
+    const effort = (opts.effort ?? "low").trim().toLowerCase();
+    const body: Record<string, unknown> = { model: cfg.model, max_tokens: 4000, system, messages: turns(user, opts) };
+    if (effort && effort !== "none") body.output_config = { effort };
     return {
       url: `${cfg.baseUrl}/messages`,
-      headers: { "x-api-key": cfg.apiKey, "anthropic-version": anthropicVersion, "content-type": "application/json" },
-      body: { model: cfg.model, max_tokens: 600, system, messages: [{ role: "user", content: user }] },
+      headers: { "x-api-key": cfg.apiKey, "anthropic-version": opts.anthropicVersion ?? "2023-06-01", "content-type": "application/json" },
+      body,
     };
   }
   const body: Record<string, unknown> = {
     model: cfg.model,
-    messages: [{ role: "system", content: system }, { role: "user", content: user }],
+    messages: [{ role: "system", content: system }, ...turns(user, opts)],
   };
   // OpenAI's current models take max_completion_tokens; most compatible servers take max_tokens.
   if (cfg.id === "openai") body.max_completion_tokens = 2000;
@@ -139,6 +152,12 @@ export function buildRequest(cfg: ProviderConfig, system: string, user: string, 
     headers: { authorization: `Bearer ${cfg.apiKey}`, "content-type": "application/json" },
     body,
   };
+}
+
+function turns(user: string, opts: RequestOptions): { role: string; content: string }[] {
+  const t = [{ role: "user", content: user }];
+  if (opts.retry) t.push({ role: "assistant", content: opts.retry.draft }, { role: "user", content: opts.retry.feedback });
+  return t;
 }
 
 /** Pull the answer text out of either response shape. Returns "" when there is none. */
@@ -160,6 +179,18 @@ export function extractText(wire: WireFormat, data: unknown): string {
       .trim();
   }
   return "";
+}
+
+/** Non-secret summary of a response shape, for diagnosing an empty answer (no content is included). */
+export function describeResponse(wire: WireFormat, data: unknown): string {
+  const d = data as Record<string, unknown> | null;
+  if (!d || typeof d !== "object") return "non-JSON response";
+  if (wire === "anthropic") {
+    const types = Array.isArray(d.content) ? (d.content as { type?: string }[]).map((b) => b?.type ?? "?").join(",") : "none";
+    return `stop_reason ${String(d.stop_reason ?? "?")}; blocks ${types || "none"}`;
+  }
+  const c = Array.isArray(d.choices) ? (d.choices as { finish_reason?: string }[])[0] : undefined;
+  return `finish_reason ${String(c?.finish_reason ?? "?")}`;
 }
 
 /** Short label for the UI and disclosure, e.g. "deepseek-flash (DeepSeek)". */
