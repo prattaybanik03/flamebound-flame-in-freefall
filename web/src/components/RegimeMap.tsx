@@ -85,7 +85,7 @@ export default function RegimeMap({
   const dataXMax = pts.reduce((m, p) => (p.x === null ? m : Math.max(m, p.xr?.[1] ?? p.x)), 0);
   const dataYMax = pts.reduce((m, p) => Math.max(m, p.yr?.[1] ?? p.y), 0);
   const xMax = flam ? 50 : Math.ceil(Math.max(320, dataXMax, target.pressureKPa) / 50) * 50;
-  const yMin = 10, yMax = Math.min(100, Math.ceil(Math.max(45, dataYMax, target.o2Pct + 5) / 5) * 5);
+  const yMin = 10, yMax = Math.min(100, Math.ceil(Math.max(45, dataYMax + 3, target.o2Pct + 5) / 5) * 5);
   const X = (v: number) => L + (Math.min(v, xMax) / xMax) * (W - L - R);
   const Y = (v: number) => T + (1 - (Math.min(Math.max(v, yMin), yMax) - yMin) / (yMax - yMin)) * (H - T - B);
   const xStep = flam ? 10 : xMax > 350 ? 100 : 50;

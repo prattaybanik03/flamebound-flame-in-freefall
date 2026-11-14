@@ -2,6 +2,7 @@
 // Result card (BUILD_PLAN A4). Every number shown is either a NASA raw cell (verbatim)
 // or a computed BCMS quantity. NASA values are never rounded; the raw cell is shown.
 import type { Component, Scored } from "@/lib/bcms";
+import type { Condition } from "@/lib/types";
 import { DIM_LABEL, fmt, whyAbove } from "@/lib/explain";
 
 const UNIT: Partial<Record<Component["dim"], string>> = { o2: "% pts", flow: "cm/s", pressure: "kPa" };
@@ -19,7 +20,26 @@ export function rowLabel(row: number) {
 }
 export const ROW_TITLE = "1-based data row in NASA's CSV, header row excluded";
 
-function Bar({ c }: { c: Component }) {
+const CANON_UNIT: Partial<Record<Component["dim"], string>> = { o2: "% O₂", flow: "cm/s", pressure: "kPa" };
+
+/** Canonical value(s) a NASA cell was converted to, for display beside the verbatim cell. */
+function canonical(cond: Condition, dim: Component["dim"]): string | null {
+  const u = CANON_UNIT[dim];
+  if (!u) return null;
+  if (cond.levels.length) return `${cond.levels.map((v) => fmt(v)).join(", ")} ${u}`;
+  if (cond.min === null || cond.max === null) return null;
+  return cond.min === cond.max ? `${fmt(cond.min)} ${u}` : `${fmt(cond.min)}–${fmt(cond.max)} ${u}`;
+}
+
+/** "NASA cell "0.21" (column "XO2") → 21 % O₂" so a converted delta is never shown beside a unitless raw value. */
+function basisText(c: Component, cond?: Condition): string {
+  if (c.score === null || !cond || !c.raw) return c.basis;
+  const canon = canonical(cond, c.dim);
+  const col = c.col ? ` (column "${c.col}")` : "";
+  return `NASA cell "${c.raw}"${col}${canon ? ` → ${canon}` : ""}`;
+}
+
+function Bar({ c, cond }: { c: Component; cond?: Condition }) {
   const recorded = c.score !== null;
   const pct = recorded ? Math.round(c.score! * 100) : 0;
   const unit = UNIT[c.dim];
@@ -40,7 +60,7 @@ function Bar({ c }: { c: Component }) {
         {recorded ? `${pct}%` : <span className="text-slate-500">not recorded</span>}
         {recorded && c.delta !== null && unit ? ` · Δ${fmt(c.delta)} ${unit}` : ""}
       </span>
-      <span className="col-start-2 text-xs text-slate-500 sm:col-span-2">{c.basis}</span>
+      <span className="col-start-2 text-xs text-slate-500 sm:col-span-2">{basisText(c, cond)}</span>
     </li>
   );
 }
@@ -84,7 +104,7 @@ export default function ResultCard({ scored, rank, next }: { scored: Scored; ran
 
         <ul className="mt-4 space-y-2.5" aria-label="Score breakdown">
           {scored.components.map((c) => (
-            <Bar key={c.dim} c={c} />
+            <Bar key={c.dim} c={c} cond={c.dim === "o2" || c.dim === "flow" || c.dim === "pressure" ? r[c.dim] : undefined} />
           ))}
         </ul>
 

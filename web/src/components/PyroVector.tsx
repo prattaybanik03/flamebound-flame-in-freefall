@@ -130,7 +130,8 @@ export default function PyroVector() {
           )}
           <Headline best={best} target={target} />
           <RegimeMap bundle={bundle} target={target} highlight={highlight} />
-          {verdict && <VerdictCard verdict={verdict} />}
+          {/* The 1 g screening question is about NASA-STD-6001 flammability, so the card shows on Flammability only. */}
+          {verdict && target.pillar === "flammability" && <VerdictCard verdict={verdict} />}
           <section aria-label="Ranked NASA records" className="flex flex-col gap-4">
             <h2 className="text-lg font-semibold capitalize text-slate-100">{target.pillar} matches</h2>
             {activeCards.length === 0 && (
