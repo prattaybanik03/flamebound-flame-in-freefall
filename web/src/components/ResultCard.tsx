@@ -32,7 +32,7 @@ function canonical(cond: Condition, dim: Component["dim"]): string | null {
 }
 
 /** "NASA cell "0.21" (column "XO2") → 21 % O₂" so a converted delta is never shown beside a unitless raw value. */
-function basisText(c: Component, cond?: Condition): string {
+export function basisText(c: Component, cond?: Condition): string {
   if (c.score === null || !cond || !c.raw) return c.basis;
   const canon = canonical(cond, c.dim);
   const col = c.col ? ` (column "${c.col}")` : "";

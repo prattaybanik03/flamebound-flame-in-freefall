@@ -16,6 +16,9 @@ import Headline from "./Headline";
 import HazardBanner from "./HazardBanner";
 import ResultCard from "./ResultCard";
 import SiBriefing from "./SiBriefing";
+import NasaContext from "./NasaContext";
+import ValidationPanel from "./ValidationPanel";
+import ReportButtons from "./ReportButtons";
 
 const DATA_URL = "/data/flamebound.json";
 const MATERIAL_KEYS: ReadonlySet<string> = new Set(MATERIAL_OPTIONS.map((m) => m.key));
@@ -116,22 +119,33 @@ export default function FlameBound() {
 
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-6 px-4 py-8 sm:px-6">
-      <header className="relative">
-        <button
-          type="button"
-          onClick={copyLink}
-          className="absolute right-0 top-1 rounded-md border border-slate-700 px-3 py-1.5 text-xs text-slate-200 hover:border-slate-500"
-        >
-          {copied ? "Link copied" : "Copy scenario link"}
-        </button>
-        <div className="flex items-center gap-3">
-          <span className="ug-flame" aria-hidden="true" />
-          <h1 className="text-4xl leading-none text-slate-50">FlameBound</h1>
+      <header className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+        <div>
+          <div className="flex items-center gap-3">
+            <span className="ug-flame" aria-hidden="true" />
+            <h1 className="text-4xl leading-none text-slate-50">FlameBound</h1>
+          </div>
+          <p className="mt-3 max-w-2xl text-sm text-slate-400">
+            NASA microgravity combustion investigations, matched to your habitat conditions and cited to their DOIs.
+            Without gravity, a candle flame burns as a dim blue sphere. FlameBound shows how far NASA&apos;s flight data covers your cabin.
+          </p>
         </div>
-        <p className="mt-3 max-w-3xl text-sm text-slate-400">
-          NASA microgravity combustion investigations, matched to your habitat conditions and cited to their DOIs.
-          Without gravity, a candle flame burns as a dim blue sphere. FlameBound shows how far NASA&apos;s flight data covers your cabin.
-        </p>
+        <nav aria-label="Scenario actions" className="flex flex-wrap gap-2 md:max-w-sm md:justify-end">
+          <button
+            type="button"
+            onClick={copyLink}
+            className="rounded-md border border-slate-700 px-3 py-1.5 text-xs text-slate-200 hover:border-orange-400 hover:text-orange-200"
+          >
+            {copied ? "Link copied" : "Copy scenario link"}
+          </button>
+          <a
+            href="#validation"
+            className="rounded-md border border-slate-700 px-3 py-1.5 text-xs text-slate-200 hover:border-orange-400 hover:text-orange-200"
+          >
+            Validation
+          </a>
+          {bundle && <ReportButtons target={target} ranked={ranked} hazard={hazard} builtOn={bundle.builtOn} />}
+        </nav>
       </header>
 
       <Controls target={target} onChange={setTarget} />
@@ -165,6 +179,7 @@ export default function FlameBound() {
           <Headline best={best} target={target} />
           <SiBriefing target={target} />
           <RegimeMap bundle={bundle} target={target} highlight={highlight} />
+          <NasaContext target={target} />
           {/* The 1 g screening question is about NASA-STD-6001 flammability, so the card shows on Flammability only. */}
           {verdict && target.pillar === "flammability" && <VerdictCard verdict={verdict} />}
           <section aria-label="Ranked NASA records" className="flex flex-col gap-4">
@@ -190,6 +205,13 @@ export default function FlameBound() {
               </>
             )}
           </section>
+          <ValidationPanel
+            bundle={bundle}
+            onOpen={(t) => {
+              setTarget(t);
+              window.scrollTo({ top: 0 });
+            }}
+          />
           <Method bundle={bundle} />
         </>
       )}
