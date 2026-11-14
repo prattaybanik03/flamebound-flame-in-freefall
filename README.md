@@ -48,16 +48,24 @@ Pick a mission atmosphere (ISS, lunar base or rover, exploration atmosphere, EVA
 ## How it works
 
 ```mermaid
-flowchart LR
-  A["NASA PSI API<br/>23 combustion investigations"] --> B["fetch_psi.py<br/>records + experimental tables"]
-  B --> C["build_conditions.py<br/>canonical units, status per value"]
-  C --> D["build_app_data.py<br/>flamebound.json · 1,980 records"]
-  D --> E["Browser engine<br/>bcms.ts · verdict.ts"]
-  E --> F["UI<br/>hazard gate · evidence cards<br/>regime maps · cited 1 g vs µg"]
-  D --> G["/api/brief (server)<br/>same ranking → evidence pack"]
-  G --> H["SI model, any provider<br/>summarise + interpret"]
-  H --> I["Verification firewall<br/>citations · numbers · no verdicts"]
-  I --> F
+flowchart TD
+  subgraph P["Data pipeline · Python"]
+    A["NASA PSI API<br/>23 combustion investigations"] --> B["fetch_psi.py<br/>records + experimental tables"]
+    B --> C["build_conditions.py<br/>canonical units, status per value"]
+    C --> D["build_app_data.py<br/>flamebound.json · 1,980 records"]
+  end
+  subgraph W["Web app · Next.js on Vercel"]
+    E["Browser engine<br/>BCMS ranking · O₂ gate · hazard"] --> F["UI<br/>evidence cards · regime maps<br/>cited 1 g vs µg"]
+  end
+  subgraph S["SI layer · server route"]
+    G["/api/brief<br/>same ranking → evidence pack"] --> H["SI model, any provider<br/>summarise + interpret"]
+    H --> I{"Verification firewall<br/>citations · numbers · no verdicts"}
+    I -- "fails: one correction" --> H
+  end
+  D --> E
+  D --> G
+  I -- "passes" --> F
+  I -. "fails twice: labelled deterministic brief" .-> F
 ```
 
 - **Pipeline (Python).** Pulls every investigation and experimental table from NASA's public PSI API. It converts each condition to canonical units (O₂ % by volume, pressure in kPa, airflow in cm/s) through explicit, auditable column mappings. Every value gets a status: `recorded`, `approx`, `range`, `levels`, `footnote`, `not_recorded`, `unparsed` or `suspect`. See [docs/DATA.md](docs/DATA.md).
