@@ -1,38 +1,81 @@
-// SI-assisted: drafted with Claude (Anthropic); reviewed by the team.
-// Cited-verdicts-only rule (locked Sat 10:47): a 1 g vs microgravity verdict is shown
-// only when a NASA source states it. Two sources qualify today:
-//   1. SAFFIRE-II (PSI-99) table rows, which record 1 g and microgravity burn results side by side.
-//   2. NASA's written research-impact statements on the investigation record (quoted verbatim).
-// Otherwise the card says no direct comparison exists. No verdict is ever computed.
+// SI-assisted: drafted with Claude (Anthropic); reviewed by the team. Hardened Sat 14 Nov
+// after an independent review by Codex (OpenAI).
+//
+// Cited-verdicts-only rule (locked Sat 10:47). A 1 g vs microgravity comparison is shown
+// only from a NASA source that actually records both: today that is SAFFIRE-II (PSI-99),
+// whose table lists 1 g and microgravity burn results side by side. Nothing is computed.
+//
+// Guardrails:
+//  - Observations are tied to the NASA record's OWN conditions, with the differences from
+//    the engineer's target shown. A reading is about that record, never about "your cabin".
+//  - When the Extrapolation Hazard (P5) is active, the card is gated: evidence is shown as
+//    nearest NASA observations only, with no target-specific conclusion.
+//  - "n/a" / blank / not recorded are UNKNOWN, never evidence of "did not burn".
+//  - Written NASA findings that are not gravity comparisons (e.g. ACME BRE on raised O2 and
+//    still air) are listed as related context and never make a verdict "available".
 
 import type { Scored } from "./bcms";
 
 export interface VerdictEvidence {
-  kind: "table" | "statement";
+  kind: "table";
   investigationId: string;
   acronym: string;
   doi: string;
   doiUrl: string;
   portalUrl: string;
-  recordRef?: string;
-  table?: string;
-  row?: number;
-  /** Values copied verbatim from NASA's table or text. */
+  recordRef: string;
+  table: string;
+  row: number;
+  /** Values copied verbatim from NASA's table. */
   facts: { label: string; value: string }[];
-  /** Plain reading, only when the table makes it unambiguous. */
+  /** Differences between this NASA record and the engineer's target (canonical units). */
+  targetDeltas: { label: string; value: string }[];
+  /** Plain reading of THIS record only, when the table makes it unambiguous. */
   reading: string | null;
 }
 
+export interface RelatedFinding {
+  investigationId: string;
+  acronym: string;
+  doi: string;
+  doiUrl: string;
+  portalUrl: string;
+  /** NASA's research-impact statement, verbatim. */
+  text: string;
+}
+
 export interface Verdict {
+  /** True only when table evidence recording both 1 g and microgravity results exists. */
   available: boolean;
+  /** True when the Extrapolation Hazard is active: no target-specific conclusion. */
+  gated: boolean;
   evidence: VerdictEvidence[];
+  related: RelatedFinding[];
   message: string;
 }
 
-const NONE = "No direct NASA 1 g vs microgravity comparison exists for these conditions in the PSI data.";
+export const NO_COMPARISON =
+  "No direct 1 g vs microgravity comparison found in the retrieved PSI evidence for this material.";
+export const GATED_MESSAGE =
+  "Extrapolation Hazard active: these are the nearest NASA observations at NASA's own test conditions, not a conclusion about your cabin.";
 
-function isNil(v: string) {
-  return /^~?\s*0$/.test(v.trim()) || /^n\/a/i.test(v.trim());
+/** Exactly zero burn ("0", "~ 0"). Anything with qualifiers or notes is not treated as zero. */
+function isZero(v: string): boolean {
+  return /^~?\s*0(\.0+)?\s*(cm|mm)?$/i.test(v.trim());
+}
+
+/** Unknown: blank, n/a, not recorded, or a pointer to a note/figure. */
+function isUnknown(v: string): boolean {
+  const s = v.trim();
+  return s === "" || /^n\/?a\b/i.test(s) || /not recorded/i.test(s) || /^(see|note)\b/i.test(s);
+}
+
+/** A positive burn observation: "Complete", or a length greater than zero with no qualifier note. */
+function isBurn(v: string): boolean {
+  const s = v.trim();
+  if (/^complete$/i.test(s)) return true;
+  const m = s.match(/^~?\s*(\d*\.?\d+)\s*(cm|mm)$/i);
+  return !!m && Number(m[1]) > 0;
 }
 
 function saffire2Evidence(s: Scored): VerdictEvidence | null {
@@ -40,13 +83,25 @@ function saffire2Evidence(s: Scored): VerdictEvidence | null {
   if (!f) return null;
   const ug = f["Microgravity burn length"] ?? "";
   const g1 = f["1-g burn length"] ?? "";
-  if (!ug && !g1) return null;
+  if (isUnknown(ug) && isUnknown(g1)) return null;
+
   let reading: string | null = null;
-  if (isNil(ug) && g1 && !isNil(g1)) {
-    reading = "In this record the 1 g test burned while the microgravity sample did not: the 1 g result was the more severe of the two.";
-  } else if (!isNil(ug) && isNil(g1)) {
-    reading = "In this record the microgravity sample burned while the 1 g test did not: the 1 g result was the less severe of the two.";
+  if (!isUnknown(ug) && !isUnknown(g1)) {
+    if (isZero(ug) && isBurn(g1)) {
+      reading = "In this NASA record, the 1 g test burned while the microgravity sample did not: at these test conditions the 1 g result was the more severe.";
+    } else if (isBurn(ug) && isZero(g1)) {
+      reading = "In this NASA record, the microgravity sample burned while the 1 g test did not: at these test conditions the 1 g result was the less severe.";
+    }
   }
+
+  const deltas: { label: string; value: string }[] = [];
+  for (const c of s.components) {
+    if (c.dim !== "o2" && c.dim !== "flow" && c.dim !== "pressure") continue;
+    const label = c.dim === "o2" ? "O₂ difference from your target" : c.dim === "flow" ? "Airflow difference" : "Pressure difference";
+    const unit = c.dim === "o2" ? "% pts" : c.dim === "flow" ? "cm/s" : "kPa";
+    deltas.push({ label, value: c.delta === null ? "not recorded by NASA" : `Δ${Number.isInteger(c.delta) ? c.delta : c.delta.toFixed(1)} ${unit}` });
+  }
+
   const inv = s.investigation;
   return {
     kind: "table",
@@ -57,45 +112,52 @@ function saffire2Evidence(s: Scored): VerdictEvidence | null {
       { label: "Thickness (NASA cell)", value: s.record.thickness.raw || "not recorded" },
       { label: "O₂ (NASA cell, %)", value: s.record.o2.raw || "not recorded" },
       { label: "Airflow (NASA cell)", value: s.record.flow.raw || "not recorded" },
-      { label: "Flow direction", value: f["Flow direction"] ?? "" },
+      { label: "Flow direction", value: f["Flow direction"] || "not recorded" },
       { label: "Microgravity burn length", value: ug || "not recorded" },
       { label: "Microgravity spread", value: f["Microgravity spread"] || "not recorded" },
       { label: "1 g burn length", value: g1 || "not recorded" },
       { label: "1 g spread rate", value: f["1-g spread rate"] || "not recorded" },
     ],
+    targetDeltas: deltas,
     reading,
   };
 }
 
+const GRAVITY_COMPARISON_SOURCES = new Set(["PSI-99"]); // SAFFIRE-II records 1 g and microgravity side by side
+
 /**
- * Collect cited verdict evidence for the target material from the ranked results.
- * `ranked` must already be scored against the engineer's target.
+ * Collect cited 1 g vs microgravity evidence for the target material.
+ * @param ranked     results of rank() for the target (used for related findings)
+ * @param allScored  every record scored against the target
+ * @param hazardLevel pass hazard(ranked, target)?.level, so the card can be gated (P5)
  */
-export function buildVerdict(ranked: Scored[], allScored: Scored[], materialKey: string): Verdict {
-  const evidence: VerdictEvidence[] = [];
-  // 1. SAFFIRE-II rows for the same material (exact match only), best BCMS first.
-  const saffire = allScored
-    .filter((s) => s.record.inv === "PSI-99" && s.record.materialKeys.includes(materialKey))
-    .sort((a, b) => b.bcms - a.bcms);
-  for (const s of saffire.slice(0, 3)) {
-    const e = saffire2Evidence(s);
-    if (e) evidence.push(e);
-  }
-  // 2. Written NASA findings on the top-ranked investigations that explicitly compare
-  //    behaviour with normal atmosphere / ventilation (quoted verbatim, never paraphrased).
-  for (const s of ranked.slice(0, 5)) {
-    const text = s.investigation.impacts || "";
-    if (/(normal atmosphere|21% oxygen|without air flow|absence of air flow|normal gravity)/i.test(text)) {
-      evidence.push({
-        kind: "statement",
-        investigationId: s.investigation.id, acronym: s.investigation.acronym, doi: s.investigation.doi,
-        doiUrl: s.investigation.doiUrl, portalUrl: s.investigation.portalUrl,
-        facts: [{ label: "NASA research impact statement", value: text }],
-        reading: null,
-      });
-    }
-  }
-  return evidence.length
-    ? { available: true, evidence, message: "Cited NASA evidence comparing 1 g and microgravity behaviour:" }
-    : { available: false, evidence: [], message: NONE };
+export function buildVerdict(
+  ranked: Scored[], allScored: Scored[], materialKey: string, hazardLevel: "hazard" | "info" | null = null,
+): Verdict {
+  const evidence = allScored
+    .filter((s) => GRAVITY_COMPARISON_SOURCES.has(s.record.inv) && s.record.materialKeys.includes(materialKey))
+    .sort((a, b) => b.bcms - a.bcms)
+    .map(saffire2Evidence)
+    .filter((e): e is VerdictEvidence => e !== null)
+    .slice(0, 4);
+
+  const related: RelatedFinding[] = ranked
+    .slice(0, 5)
+    .filter((s) => !GRAVITY_COMPARISON_SOURCES.has(s.investigation.id) && s.investigation.impacts)
+    .filter((s) => /(normal atmosphere|21% oxygen|without air flow|absence of air flow|normal gravity)/i.test(s.investigation.impacts))
+    .map((s) => ({
+      investigationId: s.investigation.id, acronym: s.investigation.acronym, doi: s.investigation.doi,
+      doiUrl: s.investigation.doiUrl, portalUrl: s.investigation.portalUrl, text: s.investigation.impacts,
+    }));
+
+  const gated = hazardLevel === "hazard";
+  const available = evidence.length > 0;
+  return {
+    available,
+    gated,
+    evidence,
+    related,
+    message: !available ? NO_COMPARISON : gated ? GATED_MESSAGE
+      : "Cited NASA records that tested this material in both 1 g and microgravity (readings apply to NASA's test conditions shown):",
+  };
 }

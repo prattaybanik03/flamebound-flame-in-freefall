@@ -4,7 +4,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { conditionDistance, rank, scoreRecord, hazard, bounds, REFUSAL_THRESHOLD } from "../src/lib/bcms.ts";
-import { buildVerdict } from "../src/lib/verdict.ts";
+import { buildVerdict, NO_COMPARISON, GATED_MESSAGE } from "../src/lib/verdict.ts";
 import type { Bundle, Target, Condition } from "../src/lib/types.ts";
 
 const bundle: Bundle = JSON.parse(readFileSync(new URL("../public/data/pyrovector.json", import.meta.url), "utf8"));
@@ -78,21 +78,42 @@ test("bounds find recorded O2 below and above target within pillar", () => {
   assert.ok(b.above && b.above.value >= 30);
 });
 
-test("verdict cites SAFFIRE-II rows for silicone with the 1 g vs microgravity reading", () => {
+test("verdict cites SAFFIRE-II rows for silicone with a record-specific reading", () => {
   const t: Target = { ...ISS, materialKey: "silicone" };
-  const all = bundle.records.map((r) => scoreRecord(r, inv(r.inv), t));
-  const v = buildVerdict(rank(bundle.records, bundle.investigations, t), all, "silicone");
+  const r = rank(bundle.records, bundle.investigations, t);
+  const all = bundle.records.map((x) => scoreRecord(x, inv(x.inv), t));
+  const v = buildVerdict(r, all, "silicone", hazard(r, t)?.level ?? null);
   assert.ok(v.available);
-  const e = v.evidence.find((x) => x.kind === "table")!;
-  assert.equal(e.investigationId, "PSI-99");
-  assert.ok(e.doi.length > 0);
+  assert.equal(v.gated, false);
+  assert.ok(v.evidence.every((e) => e.investigationId === "PSI-99" && e.doi.length > 0));
+  assert.ok(v.evidence.some((e) => e.reading?.includes("at these test conditions")));
+  assert.ok(v.evidence.every((e) => e.targetDeltas.length === 3));
 });
 
-test("no verdict for a material NASA never compared", () => {
-  const t: Target = { ...ISS, materialKey: "kapton", pillar: "flammability" };
-  const all = bundle.records.map((r) => scoreRecord(r, inv(r.inv), t));
-  const v = buildVerdict([], all, "kapton");
+test("a non-gravity written finding never makes a verdict available (Kapton)", () => {
+  const t: Target = { ...ISS, materialKey: "kapton" };
+  const r = rank(bundle.records, bundle.investigations, t);
+  const all = bundle.records.map((x) => scoreRecord(x, inv(x.inv), t));
+  const v = buildVerdict(r, all, "kapton", hazard(r, t)?.level ?? null);
   assert.equal(v.available, false);
+  assert.equal(v.message, NO_COMPARISON);
+});
+
+test("hazard gates the verdict: lunar-base silicone shows observations, no target conclusion", () => {
+  const t: Target = { ...ISS, o2Pct: 30, pressureKPa: 70.3, flowCmS: 5, materialKey: "silicone" };
+  const r = rank(bundle.records, bundle.investigations, t);
+  const all = bundle.records.map((x) => scoreRecord(x, inv(x.inv), t));
+  const v = buildVerdict(r, all, "silicone", hazard(r, t)?.level ?? null);
+  assert.equal(v.gated, true);
+  assert.equal(v.message, GATED_MESSAGE);
+});
+
+test("n/a and noted values are unknown, never 'did not burn'", () => {
+  const t: Target = { ...ISS, materialKey: "pmma" };
+  const all = bundle.records.map((x) => scoreRecord(x, inv(x.inv), t));
+  const v = buildVerdict([], all, "pmma", null);
+  // PMMA rows hold qualified values ("~ 10 cm (note 3)", "~ 0 (Nomex)"): no reading may be produced
+  assert.ok(v.evidence.every((e) => e.reading === null));
 });
 
 test("planned envelopes (FLEX-2) are never ranked", () => {
