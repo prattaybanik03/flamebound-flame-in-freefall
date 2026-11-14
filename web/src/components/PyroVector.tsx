@@ -9,6 +9,7 @@ import { hazard as computeHazard, rank } from "@/lib/bcms";
 import Controls from "./Controls";
 import Headline from "./Headline";
 import HazardBanner from "./HazardBanner";
+import ResultCard from "./ResultCard";
 
 const DATA_URL = "/data/pyrovector.json";
 
@@ -31,6 +32,11 @@ export default function PyroVector() {
   const hazard = useMemo(() => (bundle ? computeHazard(ranked, target) : null), [bundle, ranked, target]);
   // Headline is the best match in the ACTIVE pillar (locked Sat 11:20).
   const best = useMemo(() => ranked.find((s) => s.investigation.pillar === target.pillar) ?? null, [ranked, target.pillar]);
+  // Result cards (A4): top 8 overall, active-pillar first, then other pillars as supporting evidence.
+  const [activeCards, otherCards] = useMemo(() => {
+    const top = ranked.slice(0, 8);
+    return [top.filter((s) => s.investigation.pillar === target.pillar), top.filter((s) => s.investigation.pillar !== target.pillar)];
+  }, [ranked, target.pillar]);
 
   useEffect(() => {
     const ctrl = new AbortController();
@@ -97,6 +103,28 @@ export default function PyroVector() {
             />
           )}
           <Headline best={best} target={target} />
+          <section aria-label="Ranked NASA records" className="flex flex-col gap-4">
+            <h2 className="text-lg font-semibold capitalize text-slate-100">{target.pillar} matches</h2>
+            {activeCards.length === 0 && (
+              <p className="text-sm text-slate-400">No {target.pillar} investigation is in the top 8.</p>
+            )}
+            {activeCards.map((s, i) => (
+              <ResultCard key={s.record.id} scored={s} rank={i + 1} next={activeCards[i + 1] ?? null} />
+            ))}
+            {otherCards.length > 0 && (
+              <>
+                <h2 className="mt-4 text-lg font-semibold text-slate-100">Other pillars (supporting evidence)</h2>
+                {otherCards.map((s, i) => (
+                  <ResultCard
+                    key={s.record.id}
+                    scored={s}
+                    rank={activeCards.length + i + 1}
+                    next={otherCards[i + 1] ?? null}
+                  />
+                ))}
+              </>
+            )}
+          </section>
           <p className="text-sm text-slate-400">
             {bundle.investigations.length} investigations · {bundle.records.length.toLocaleString("en-AU")} records ·
             data snapshot {bundle.builtOn}
