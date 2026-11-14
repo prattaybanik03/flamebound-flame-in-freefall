@@ -7,3 +7,6 @@ This project uses data from NASA Physical Sciences Informatics (PSI),
 https://psi.nasa.gov, released under CC0-1.0. Each NASA investigation is
 cited in the application by its DOI. No NASA logos or branding are used,
 and use of NASA data does not imply NASA endorsement.
+
+The Barlow and Barlow Condensed typefaces in web/public/fonts are Copyright 2017 The Barlow Project Authors
+(https://github.com/jpt/barlow), licensed under the SIL Open Font License 1.1 (web/public/fonts/OFL.txt).

@@ -197,6 +197,6 @@ docs/               Data pipeline notes and screenshots
 - **Data:** NASA Physical Sciences Informatics, https://psi.nasa.gov, CC0-1.0. All 23 investigations are cited in the app by DOI; see [docs/DATA.md](docs/DATA.md).
 - **Challenge resources:** NASA Combustion Science; A Researcher's Guide to ISS Combustion Science; Apollo 1, Apollo 13 and Mir fire records; NASA spinoffs on firefighter air tanks, smoke detection and protective clothing.
 - **SI model:** configurable. Defaults: Claude Haiku 5.5 (Anthropic), GPT-5.4 mini (OpenAI), deepseek-flash (DeepSeek), Gemini 3.8 Flash (Google). The deployed demo's provider and model are shown on every SI briefing.
-- **Software:** Next.js and React (MIT), TypeScript (Apache-2.0), Tailwind CSS (MIT), ESLint (MIT), Python `requests` (Apache-2.0).
+- **Software:** Next.js and React (MIT), TypeScript (Apache-2.0), Tailwind CSS (MIT), ESLint (MIT), Python `requests` (Apache-2.0); Barlow and Barlow Condensed typefaces by The Barlow Project Authors (SIL Open Font License 1.1, bundled in `web/public/fonts` with its licence).
 - **Licence:** FlameBound's original code is released under the [Apache License 2.0](LICENSE); see also [NOTICE](NOTICE).
 - No NASA logos or branding are used. Use of NASA data does not imply NASA endorsement.
