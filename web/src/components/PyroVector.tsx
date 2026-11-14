@@ -8,6 +8,7 @@ import { DEFAULT_TARGET } from "@/lib/presets";
 import { hazard as computeHazard, rank, scoreRecord } from "@/lib/bcms";
 import { buildVerdict } from "@/lib/verdict";
 import VerdictCard from "./VerdictCard";
+import RegimeMap from "./RegimeMap";
 import Controls from "./Controls";
 import Headline from "./Headline";
 import HazardBanner from "./HazardBanner";
@@ -44,6 +45,7 @@ export default function PyroVector() {
     });
     return buildVerdict(ranked, allScored, target.materialKey, hazard?.level ?? null);
   }, [bundle, ranked, target, hazard]);
+  const highlight = useMemo(() => new Set(ranked.slice(0, 8).map((s) => s.record.id)), [ranked]);
   // Result cards (A4): top 8 overall, active-pillar first, then other pillars as supporting evidence.
   const [activeCards, otherCards] = useMemo(() => {
     const top = ranked.slice(0, 8);
@@ -115,6 +117,7 @@ export default function PyroVector() {
             />
           )}
           <Headline best={best} target={target} />
+          <RegimeMap bundle={bundle} target={target} highlight={highlight} />
           {verdict && <VerdictCard verdict={verdict} />}
           <section aria-label="Ranked NASA records" className="flex flex-col gap-4">
             <h2 className="text-lg font-semibold capitalize text-slate-100">{target.pillar} matches</h2>

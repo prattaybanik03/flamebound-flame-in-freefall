@@ -20,6 +20,7 @@ const OUTCOME_COLOR: Record<string, string> = {
   self_extinguished: "#a78bfa",
   flow_terminated: "#94a3b8",
   cool_flame: "#22d3ee",
+  other: "#facc15",
 };
 const OUTCOME_LABEL: Record<string, string> = {
   extinguished: "Extinguished (FLEX)",
@@ -27,7 +28,10 @@ const OUTCOME_LABEL: Record<string, string> = {
   self_extinguished: "Self-extinguished (CFI-G)",
   flow_terminated: "Flow terminated (CFI-G)",
   cool_flame: "Cool flame (CFI-G)",
+  other: "Other recorded outcome (FLEX)",
 };
+// No category is not the same as "not recorded": the record may still list outcome cells.
+const NO_CATEGORY = "Outcome not categorised (hover for record)";
 const INV_COLOR = ["#f59e0b", "#ef4444", "#10b981", "#eab308", "#ec4899", "#6366f1"];
 
 interface Pt { r: PsiRecord; inv: Investigation; x: number | null; y: number; color: string; label: string }
@@ -58,7 +62,7 @@ export default function RegimeMap({
         if (x === null) continue;
         const cat = r.outcome?.category ?? "";
         const color = OUTCOME_COLOR[cat] ?? "#64748b";
-        legend.set(OUTCOME_LABEL[cat] ?? "Outcome not recorded", color);
+        legend.set(OUTCOME_LABEL[cat] ?? NO_CATEGORY, color);
         pts.push({ r, inv, x, y, color, label: inv.acronym });
       }
     }
@@ -67,12 +71,16 @@ export default function RegimeMap({
 
   // Geometry
   const W = 640, H = 340, L = flam ? 104 : 48, R = 16, T = 16, B = 40;
-  const xMax = flam ? 50 : Math.max(320, target.pressureKPa * 1.1);
-  const yMin = 10, yMax = Math.max(45, Math.min(100, target.o2Pct + 5));
+  // Axes extend to cover every plotted point and the target, so no NASA point is pinned to an edge.
+  const dataXMax = pts.reduce((m, p) => (p.x === null ? m : Math.max(m, p.x)), 0);
+  const dataYMax = pts.reduce((m, p) => Math.max(m, p.y), 0);
+  const xMax = flam ? 50 : Math.ceil(Math.max(320, dataXMax, target.pressureKPa) / 50) * 50;
+  const yMin = 10, yMax = Math.min(100, Math.ceil(Math.max(45, dataYMax, target.o2Pct + 5) / 5) * 5);
   const X = (v: number) => L + (Math.min(v, xMax) / xMax) * (W - L - R);
   const Y = (v: number) => T + (1 - (Math.min(Math.max(v, yMin), yMax) - yMin) / (yMax - yMin)) * (H - T - B);
-  const xTicks = flam ? [0, 10, 20, 30, 40, 50] : [0, 50, 100, 150, 200, 250, 300];
-  const yTicks = [10, 20, 30, 40, ...(yMax > 60 ? [60, 80, 100] : [])].filter((v) => v <= yMax);
+  const xStep = flam ? 10 : xMax > 350 ? 100 : 50;
+  const xTicks = Array.from({ length: Math.floor(xMax / xStep) + 1 }, (_, i) => i * xStep);
+  const yTicks = [10, 20, 30, 40, ...(yMax > 60 ? [60, 80, 100] : yMax > 50 ? [50] : [])].filter((v) => v <= yMax);
   const tx = flam ? target.flowCmS : target.pressureKPa;
 
   return (
@@ -109,7 +117,8 @@ export default function RegimeMap({
         </text>
         {pts.map((p) => {
           const hl = highlight.has(p.r.id);
-          const cx = p.x === null ? 10 + ((p.r.row * 37) % (L - 36)) : X(p.x);
+          // Strip spans x = 8..L-16; keep even a highlighted (r = 6) point inside it.
+          const cx = p.x === null ? 18 + ((p.r.row * 37) % (L - 48)) : X(p.x);
           return (
             <circle key={p.r.id} cx={cx} cy={Y(p.y)} r={hl ? 6 : 3.2}
               fill={p.color} fillOpacity={hl ? 1 : 0.55} stroke={hl ? "#fff" : "none"} strokeWidth={1.5}
