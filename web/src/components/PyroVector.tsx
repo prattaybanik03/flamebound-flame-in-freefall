@@ -2,10 +2,13 @@
 // SI-assisted: drafted with Claude (Anthropic); reviewed by the team.
 // App shell: loads the PSI data bundle (built by scripts/build_app_data.py) once on mount.
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { Bundle, Target } from "@/lib/types";
 import { DEFAULT_TARGET } from "@/lib/presets";
+import { hazard as computeHazard, rank } from "@/lib/bcms";
 import Controls from "./Controls";
+import Headline from "./Headline";
+import HazardBanner from "./HazardBanner";
 
 const DATA_URL = "/data/pyrovector.json";
 
@@ -20,6 +23,14 @@ export default function PyroVector() {
   const [attempt, setAttempt] = useState(0);
   // Target conditions: the single source of truth for ranking (A3+).
   const [target, setTarget] = useState<Target>(DEFAULT_TARGET);
+
+  const ranked = useMemo(
+    () => (bundle ? rank(bundle.records, bundle.investigations, target) : []),
+    [bundle, target],
+  );
+  const hazard = useMemo(() => (bundle ? computeHazard(ranked, target) : null), [bundle, ranked, target]);
+  // Headline is the best match in the ACTIVE pillar (locked Sat 11:20).
+  const best = useMemo(() => ranked.find((s) => s.investigation.pillar === target.pillar) ?? null, [ranked, target.pillar]);
 
   useEffect(() => {
     const ctrl = new AbortController();
@@ -76,10 +87,21 @@ export default function PyroVector() {
           Loading NASA PSI data…
         </p>
       ) : (
-        <p className="text-sm text-slate-400">
-          {bundle.investigations.length} investigations · {bundle.records.length.toLocaleString("en-AU")} records · data
-          snapshot {bundle.builtOn}
-        </p>
+        <>
+          {hazard && (
+            <HazardBanner
+              hazard={hazard}
+              records={bundle.records}
+              investigations={bundle.investigations}
+              target={target}
+            />
+          )}
+          <Headline best={best} target={target} />
+          <p className="text-sm text-slate-400">
+            {bundle.investigations.length} investigations · {bundle.records.length.toLocaleString("en-AU")} records ·
+            data snapshot {bundle.builtOn}
+          </p>
+        </>
       )}
     </main>
   );
