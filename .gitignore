@@ -11,3 +11,21 @@ node_modules/
 web/.next/
 web/node_modules/
 web/.vercel/
+
+# --- Private: agent instructions & coordination (local only, never pushed) ---
+AGENTS.md
+CLAUDE.md
+GEMINI.md
+agents/
+.claude/
+.cursor/
+.codex/
+
+# --- Secrets ---
+# .env and .env.* above cover web/.env.local; only .env.example is tracked
+*.pem
+*.key
+*.p12
+*.pfx
+secrets/
+credentials*.json
