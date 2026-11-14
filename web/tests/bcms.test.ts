@@ -163,3 +163,22 @@ test("partial-gravity warning never claims microgravity/1 g results bound the ca
   assert.match(text, /LUCI/);
   assert.match(text, /FM2/);
 });
+
+test("O2 gate: lunar-base silicone (best match tested ~8.5 % pts lower) raises the hazard", () => {
+  const t: Target = { ...ISS, o2Pct: 30, pressureKPa: 70.3, flowCmS: 20, materialKey: "silicone" };
+  const r = rank(bundle.records, bundle.investigations, t);
+  const best = r.find((s) => s.investigation.pillar === "flammability")!;
+  assert.ok(best.bcms >= REFUSAL_THRESHOLD, `precondition: score alone would pass (${best.bcms})`);
+  const h = hazard(r, t);
+  assert.equal(h?.level, "hazard");
+  assert.match(h!.reasons.join(" "), /atmosphere-class gate/);
+});
+
+test("O2 gate: ISS + SIBAL stays clean (SAFFIRE-I within 2 % pts)", () => {
+  assert.equal(hazard(rank(bundle.records, bundle.investigations, ISS), ISS), null);
+});
+
+test("O2 gate: lunar suppression with heptane stays clean (FLEX recorded at 30% O2)", () => {
+  const t: Target = { ...ISS, o2Pct: 30, pressureKPa: 70.3, flowCmS: 0, materialKey: "heptane", pillar: "suppression" };
+  assert.equal(hazard(rank(bundle.records, bundle.investigations, t), t), null);
+});

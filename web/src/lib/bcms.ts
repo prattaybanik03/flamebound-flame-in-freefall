@@ -18,6 +18,15 @@ export const SCALES = { o2: 15, flow: 15, pressure: 50 } as const; // % pts, cm/
 export const MATERIAL_SCORES = { exact: 1.0, surrogate: 0.9, samePhase: 0.75, other: 0.4 } as const;
 export const PILLAR_SCORES = { fullScale: 1.0, chamber: 0.8, mismatch: 0.3 } as const;
 export const REFUSAL_THRESHOLD = 65;
+/**
+ * Oxygen coverage gate (locked Sat 14:00, Pratt). O2 concentration is the primary driver of
+ * flammability, so a strong match on other dimensions must not "cover" a different atmosphere
+ * class. NASA's candidate atmospheres step 21 -> 26.5 -> 30 -> 34 % O2; a +/-2 % pt tolerance
+ * keeps the best match inside the engineer's atmosphere class. Applied in hazard(), not in BCMS.
+ */
+export const O2_GATE_PTS = 2;
+
+export type Weights = Record<"o2" | "material" | "flow" | "pressure" | "pillar", number>;
 
 const USABLE = new Set(["recorded", "approx", "range", "levels", "footnote"]);
 
@@ -67,11 +76,11 @@ export function conditionDistance(c: Condition, target: number): number | null {
   return Math.min(Math.abs(target - c.min), Math.abs(target - c.max));
 }
 
-function conditionComponent(dim: "o2" | "flow" | "pressure", c: Condition, target: number): Component {
+function conditionComponent(dim: "o2" | "flow" | "pressure", c: Condition, target: number, w: Weights = WEIGHTS): Component {
   const d = conditionDistance(c, target);
   return {
     dim,
-    weight: WEIGHTS[dim],
+    weight: w[dim],
     score: d === null ? null : Math.exp(-d / SCALES[dim]),
     delta: d,
     basis: d === null ? notRecordedReason(c) : c.raw || c.col,
@@ -90,7 +99,7 @@ function notRecordedReason(c: Condition): string {
   }
 }
 
-export function materialComponent(r: PsiRecord, inv: Investigation, targetKey: string): Component {
+export function materialComponent(r: PsiRecord, inv: Investigation, targetKey: string, w: Weights = WEIGHTS): Component {
   const targetPhase = MATERIAL_PHASE[targetKey];
   const recordPhase: Phase = inv.phase === "surrogate" ? "gas" : inv.phase;
   let score: number | null;
@@ -106,10 +115,10 @@ export function materialComponent(r: PsiRecord, inv: Investigation, targetKey: s
   } else {
     score = MATERIAL_SCORES.other; basis = `Different fuel phase (${recordPhase} vs ${targetPhase})`;
   }
-  return { dim: "material", weight: WEIGHTS.material, score, delta: null, basis, raw: r.material };
+  return { dim: "material", weight: w.material, score, delta: null, basis, raw: r.material };
 }
 
-export function pillarComponent(inv: Investigation, pillar: Exclude<Pillar, "fundamentals">): Component {
+export function pillarComponent(inv: Investigation, pillar: Exclude<Pillar, "fundamentals">, w: Weights = WEIGHTS): Component {
   let score: number; let basis: string;
   if (inv.pillar === pillar) {
     score = inv.scale === "full" ? PILLAR_SCORES.fullScale : PILLAR_SCORES.chamber;
@@ -117,16 +126,17 @@ export function pillarComponent(inv: Investigation, pillar: Exclude<Pillar, "fun
   } else {
     score = PILLAR_SCORES.mismatch; basis = `Different pillar (${inv.pillar})`;
   }
-  return { dim: "pillar", weight: WEIGHTS.pillar, score, delta: null, basis };
+  return { dim: "pillar", weight: w.pillar, score, delta: null, basis };
 }
 
-export function scoreRecord(r: PsiRecord, inv: Investigation, t: Target): Scored {
+/** `w` defaults to the locked WEIGHTS; other weights are used only by the robustness check. */
+export function scoreRecord(r: PsiRecord, inv: Investigation, t: Target, w: Weights = WEIGHTS): Scored {
   const components: Component[] = [
-    conditionComponent("o2", r.o2, t.o2Pct),
-    materialComponent(r, inv, t.materialKey),
-    conditionComponent("flow", r.flow, t.flowCmS),
-    conditionComponent("pressure", r.pressure, t.pressureKPa),
-    pillarComponent(inv, t.pillar),
+    conditionComponent("o2", r.o2, t.o2Pct, w),
+    materialComponent(r, inv, t.materialKey, w),
+    conditionComponent("flow", r.flow, t.flowCmS, w),
+    conditionComponent("pressure", r.pressure, t.pressureKPa, w),
+    pillarComponent(inv, t.pillar, w),
   ];
   const sum = components.reduce((acc, c) => acc + (c.score === null ? 0 : c.weight * c.score), 0);
   const coverage = components.reduce((acc, c) => acc + (c.score === null ? 0 : c.weight), 0);
@@ -138,13 +148,13 @@ export function round1(x: number): number {
 }
 
 /** Score every record; return the best record per investigation, best first. */
-export function rank(records: PsiRecord[], invs: Investigation[], t: Target): Scored[] {
+export function rank(records: PsiRecord[], invs: Investigation[], t: Target, w: Weights = WEIGHTS): Scored[] {
   const byId = new Map(invs.map((i) => [i.id, i]));
   const best = new Map<string, Scored>();
   for (const r of records) {
     const inv = byId.get(r.inv);
     if (!inv || inv.plannedEnvelope) continue; // planned envelopes are context only (locked Sat 11:20)
-    const s = scoreRecord(r, inv, t);
+    const s = scoreRecord(r, inv, t, w);
     const cur = best.get(r.inv);
     if (!cur || s.bcms > cur.bcms) best.set(r.inv, s);
   }
@@ -167,9 +177,20 @@ export function hazard(ranked: Scored[], t: Target): Hazard | null {
   }
   // Threshold checks the best match in the ACTIVE pillar (locked Sat 11:20), so a record
   // from another pillar can never 'clear' the engineer's question.
-  const top = ranked.find((s) => s.investigation.pillar === t.pillar)?.bcms ?? 0;
+  const bestInPillar = ranked.find((s) => s.investigation.pillar === t.pillar);
+  const top = bestInPillar?.bcms ?? 0;
   if (top < REFUSAL_THRESHOLD) {
     reasons.push(`Best ${t.pillar} match is ${top}% BCMS, below the ${REFUSAL_THRESHOLD}% threshold: NASA's data does not cover this cabin state closely enough to support a verdict.`);
+  }
+  // Oxygen coverage gate: the best match must sit in the same atmosphere class (O2 within +/-O2_GATE_PTS).
+  if (bestInPillar) {
+    const o2 = bestInPillar.components.find((c) => c.dim === "o2");
+    const name = `${bestInPillar.investigation.acronym} ${bestInPillar.record.ref}`.trim();
+    if (!o2 || o2.score === null || o2.delta === null) {
+      reasons.push(`Oxygen not recorded for the best ${t.pillar} match (${name}): coverage of your ${t.o2Pct}% O₂ atmosphere cannot be established.`);
+    } else if (o2.delta > O2_GATE_PTS) {
+      reasons.push(`Best ${t.pillar} match (${name}) was tested ${Number(o2.delta.toFixed(1))} % pts of O₂ away from your ${t.o2Pct}% target, beyond the ±${O2_GATE_PTS} % pt atmosphere-class gate. O₂ concentration is the primary driver of flammability, so this record does not cover your atmosphere.`);
+    }
   }
   if (reasons.length) return { level: "hazard", reasons };
   if (t.gravity === 1) {
