@@ -7,7 +7,7 @@ import { conditionDistance, rank, scoreRecord, hazard, bounds, REFUSAL_THRESHOLD
 import { buildVerdict, NO_COMPARISON, GATED_MESSAGE } from "../src/lib/verdict.ts";
 import type { Bundle, Target, Condition } from "../src/lib/types.ts";
 
-const bundle: Bundle = JSON.parse(readFileSync(new URL("../public/data/pyrovector.json", import.meta.url), "utf8"));
+const bundle: Bundle = JSON.parse(readFileSync(new URL("../public/data/flamebound.json", import.meta.url), "utf8"));
 const inv = (id: string) => bundle.investigations.find((i) => i.id === id)!;
 const rec = (inv: string, ref: string) => bundle.records.find((r) => r.inv === inv && r.ref === ref)!;
 

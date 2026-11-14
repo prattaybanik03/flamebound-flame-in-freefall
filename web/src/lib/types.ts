@@ -1,5 +1,5 @@
 // SI-assisted: drafted with Claude (Anthropic); reviewed by the team.
-// Types for the PyroVector data bundle (built by scripts/build_app_data.py).
+// Types for the FlameBound data bundle (built by scripts/build_app_data.py).
 
 export type Status =
   | "recorded"

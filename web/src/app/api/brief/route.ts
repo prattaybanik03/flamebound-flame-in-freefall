@@ -4,7 +4,7 @@
 // The client sends only the scenario query string. The server rebuilds the ranking from the
 // canonical NASA bundle, sends the model nothing but that evidence pack, validates the draft
 // (citations, numeric firewall, no safety verdicts) and falls back to a deterministic brief.
-import bundleJson from "../../../../public/data/pyrovector.json";
+import bundleJson from "../../../../public/data/flamebound.json";
 import type { Bundle } from "@/lib/types";
 import { hazard as computeHazard, rank } from "@/lib/bcms";
 import { numericFirewall } from "@/lib/explain";

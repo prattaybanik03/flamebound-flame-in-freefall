@@ -17,7 +17,7 @@ import HazardBanner from "./HazardBanner";
 import ResultCard from "./ResultCard";
 import SiBriefing from "./SiBriefing";
 
-const DATA_URL = "/data/pyrovector.json";
+const DATA_URL = "/data/flamebound.json";
 const MATERIAL_KEYS: ReadonlySet<string> = new Set(MATERIAL_OPTIONS.map((m) => m.key));
 
 function isBundle(x: unknown): x is Bundle {
@@ -25,7 +25,7 @@ function isBundle(x: unknown): x is Bundle {
   return !!b && Array.isArray(b.investigations) && Array.isArray(b.records) && typeof b.builtOn === "string";
 }
 
-export default function PyroVector() {
+export default function FlameBound() {
   const [bundle, setBundle] = useState<Bundle | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [attempt, setAttempt] = useState(0);
@@ -93,7 +93,7 @@ export default function PyroVector() {
       .then((json: unknown) => {
         if (!isBundle(json)) throw new Error("Data bundle has an unexpected shape");
         if (process.env.NODE_ENV !== "production") {
-          console.log(`PyroVector data: ${json.investigations.length} investigations, ${json.records.length} records`);
+          console.log(`FlameBound data: ${json.investigations.length} investigations, ${json.records.length} records`);
         }
         // Apply a shared scenario from the URL (if any) once the data is ready, then start syncing.
         const fromUrl = targetFromSearch(window.location.search, MATERIAL_KEYS);
@@ -124,7 +124,7 @@ export default function PyroVector() {
         >
           {copied ? "Link copied" : "Copy scenario link"}
         </button>
-        <h1 className="text-3xl font-semibold tracking-tight">PyroVector</h1>
+        <h1 className="text-3xl font-semibold tracking-tight">FlameBound</h1>
         <p className="mt-2 max-w-3xl text-sm text-slate-400">
           NASA microgravity combustion investigations, matched to your habitat conditions and cited to their DOIs.
         </p>

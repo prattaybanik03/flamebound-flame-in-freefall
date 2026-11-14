@@ -6,7 +6,7 @@ import { rank } from "../src/lib/bcms.ts";
 import { describe, numericFirewall, whyAbove } from "../src/lib/explain.ts";
 import type { Bundle, Target } from "../src/lib/types.ts";
 
-const bundle: Bundle = JSON.parse(readFileSync(new URL("../public/data/pyrovector.json", import.meta.url), "utf8"));
+const bundle: Bundle = JSON.parse(readFileSync(new URL("../public/data/flamebound.json", import.meta.url), "utf8"));
 const target: Target = {
   o2Pct: 21, pressureKPa: 101.3, flowCmS: 20, flowDirection: "concurrent",
   materialKey: "sibal", thicknessMm: null, gravity: 0, pillar: "flammability",

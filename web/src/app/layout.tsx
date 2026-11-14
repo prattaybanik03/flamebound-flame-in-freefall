@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "PyroVector: NASA microgravity fire-safety envelopes",
+  title: "FlameBound: NASA microgravity fire-safety envelopes",
   description:
     "Turning 23 NASA microgravity combustion investigations into boundary-matched, DOI-verified fire-safety envelopes for spacecraft habitat engineers.",
 };

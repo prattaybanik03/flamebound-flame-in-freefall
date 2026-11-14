@@ -7,7 +7,7 @@ import { readFileSync } from "node:fs";
 import { WEIGHTS, rank, hazard, type Weights } from "../src/lib/bcms.ts";
 import type { Bundle, Target } from "../src/lib/types.ts";
 
-const bundle: Bundle = JSON.parse(readFileSync(new URL("../public/data/pyrovector.json", import.meta.url), "utf8"));
+const bundle: Bundle = JSON.parse(readFileSync(new URL("../public/data/flamebound.json", import.meta.url), "utf8"));
 const base: Target = { o2Pct: 21, pressureKPa: 101.4, flowCmS: 20, flowDirection: "concurrent", materialKey: "sibal", thicknessMm: null, gravity: 0, pillar: "flammability" };
 const SCENARIOS: Record<string, Partial<Target>> = {
   "ISS, SIBAL, 20 cm/s (flammability)": {},

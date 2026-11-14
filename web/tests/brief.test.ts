@@ -7,7 +7,7 @@ import { numericFirewall } from "../src/lib/explain.ts";
 import { buildEvidence, validateBrief, fallbackBrief, splitSentences } from "../src/lib/brief.ts";
 import type { Bundle, Target } from "../src/lib/types.ts";
 
-const bundle: Bundle = JSON.parse(readFileSync(new URL("../public/data/pyrovector.json", import.meta.url), "utf8"));
+const bundle: Bundle = JSON.parse(readFileSync(new URL("../public/data/flamebound.json", import.meta.url), "utf8"));
 const ISS: Target = { o2Pct: 21, pressureKPa: 101.4, flowCmS: 20, flowDirection: "concurrent", materialKey: "sibal", thicknessMm: null, gravity: 0, pillar: "flammability" };
 const LUNAR: Target = { ...ISS, o2Pct: 30, pressureKPa: 70.3, flowCmS: 20, materialKey: "silicone" };
 const pack = (t: Target) => { const r = rank(bundle.records, bundle.investigations, t); return buildEvidence(r, t, hazard(r, t), "test material"); };

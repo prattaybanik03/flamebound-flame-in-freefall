@@ -30,4 +30,4 @@ This fetches 23 combustion investigations through the public PSI API. They cover
 
 ## App data bundle
 
-`python scripts/build_app_data.py` writes `web/public/data/pyrovector.json`: 23 investigations and 1,980 records. Each record keeps its investigation ID, table file, row, test reference, material and, for every condition, the canonical interval, discrete levels, status, raw cell and source column. Outcome columns (FLEX test end, CFI-G self-extinction, SAFFIRE-II 1 g vs microgravity burn results) are copied verbatim. FLEX-2 is flagged as a planned condition envelope (context only, never ranked).
+`python scripts/build_app_data.py` writes `web/public/data/flamebound.json`: 23 investigations and 1,980 records. Each record keeps its investigation ID, table file, row, test reference, material and, for every condition, the canonical interval, discrete levels, status, raw cell and source column. Outcome columns (FLEX test end, CFI-G self-extinction, SAFFIRE-II 1 g vs microgravity burn results) are copied verbatim. FLEX-2 is flagged as a planned condition envelope (context only, never ranked).

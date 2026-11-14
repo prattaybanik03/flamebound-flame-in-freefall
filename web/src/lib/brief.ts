@@ -1,5 +1,5 @@
 // SI-assisted: drafted with Claude (Anthropic); reviewed by the team.
-// SI evidence briefing: the SI layer of PyroVector. Pure functions only (no network, no
+// SI evidence briefing: the SI layer of FlameBound. Pure functions only (no network, no
 // runtime imports), so every rule is unit-tested.
 //
 // Contract (decided by Pratt, Sat 14 Nov 14:20):

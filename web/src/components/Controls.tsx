@@ -1,6 +1,6 @@
 "use client";
 // SI-assisted: drafted with Claude (Anthropic); reviewed by the team.
-// Controls panel (BUILD_PLAN A2). Stateless: the target lives in PyroVector.
+// Controls panel (BUILD_PLAN A2). Stateless: the target lives in FlameBound.
 // Each control states its role, per the Codex-review amendments: nothing may imply
 // it changes the ranking when it doesn't.
 

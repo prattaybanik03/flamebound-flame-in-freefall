@@ -1,4 +1,4 @@
-<h1 align="center">PyroVector</h1>
+<h1 align="center">FlameBound</h1>
 
 <p align="center"><strong>Turning 23 NASA microgravity combustion investigations into boundary-matched, DOI-verified fire safety envelopes for spacecraft habitat engineers.</strong></p>
 
@@ -17,7 +17,7 @@
   <a href="#validation">Validation</a>
 </p>
 
-![PyroVector flagging a lunar-base cabin (30% O₂, 10.2 psi) with silicone: the best NASA match was tested at ~22% O₂, so the oxygen gate raises an Extrapolation Hazard](docs/images/screenshot-hazard.jpg)
+![FlameBound flagging a lunar-base cabin (30% O₂, 10.2 psi) with silicone: the best NASA match was tested at ~22% O₂, so the oxygen gate raises an Extrapolation Hazard](docs/images/screenshot-hazard.jpg)
 
 ## The problem
 
@@ -29,7 +29,7 @@ An engineer qualifying a cabin material needs to know three things:
 2. Why do they match, and how closely?
 3. Where does the evidence stop?
 
-## What PyroVector does
+## What FlameBound does
 
 Pick a mission atmosphere (ISS, lunar base or rover, exploration atmosphere, EVA suit) or set O₂, pressure and airflow. Then choose a material or fuel and a safety pillar: **Flammability** or **Suppression**.
 
@@ -43,7 +43,7 @@ Pick a mission atmosphere (ISS, lunar base or rover, exploration atmosphere, EVA
 | **SI evidence briefing** | An SI model (Claude, ChatGPT, DeepSeek, Gemini or any OpenAI-compatible model) summarises and interprets the top NASA records for the scenario. Every sentence must cite a record, every number must appear in NASA's data, and safety verdicts are rejected. Otherwise a labelled deterministic brief is shown |
 | **Shareable scenarios** | The URL encodes the whole scenario, so a colleague or judge opens the exact view in one click |
 
-![Regime map and cited 1 g vs microgravity evidence for silicone, with differences from the target](docs/images/screenshot-evidence.jpg)
+![Headline match score, the SI evidence briefing panel and the flammability regime map (O₂ vs cabin airflow) for a silicone lunar-base cabin](docs/images/screenshot-evidence.jpg)
 
 ## How it works
 
@@ -51,7 +51,7 @@ Pick a mission atmosphere (ISS, lunar base or rover, exploration atmosphere, EVA
 flowchart LR
   A["NASA PSI API<br/>23 combustion investigations"] --> B["fetch_psi.py<br/>records + experimental tables"]
   B --> C["build_conditions.py<br/>canonical units, status per value"]
-  C --> D["build_app_data.py<br/>pyrovector.json · 1,980 records"]
+  C --> D["build_app_data.py<br/>flamebound.json · 1,980 records"]
   D --> E["Browser engine<br/>bcms.ts · verdict.ts"]
   E --> F["UI<br/>hazard gate · evidence cards<br/>regime maps · cited 1 g vs µg"]
   D --> G["/api/brief (server)<br/>same ranking → evidence pack"]
@@ -124,7 +124,7 @@ While it is active, no conclusion is drawn about the engineer's cabin.
 ## Run it
 
 ```bash
-# Data pipeline (Python 3.10+): regenerates web/public/data/pyrovector.json
+# Data pipeline (Python 3.10+): regenerates web/public/data/flamebound.json
 pip install -r requirements.txt
 python scripts/fetch_psi.py
 python scripts/build_conditions.py
@@ -189,5 +189,5 @@ docs/               Data pipeline notes and screenshots
 - **Challenge resources:** NASA Combustion Science; A Researcher's Guide to ISS Combustion Science; Apollo 1, Apollo 13 and Mir fire records; NASA spinoffs on firefighter air tanks, smoke detection and protective clothing.
 - **SI model:** configurable. Defaults: Claude Haiku 5.5 (Anthropic), GPT-5.4 mini (OpenAI), deepseek-flash (DeepSeek), Gemini 3.8 Flash (Google). The deployed demo's provider and model are shown on every SI briefing.
 - **Software:** Next.js and React (MIT), TypeScript (Apache-2.0), Tailwind CSS (MIT), ESLint (MIT), Python `requests` (Apache-2.0).
-- **Licence:** PyroVector's original code is released under the [Apache License 2.0](LICENSE); see also [NOTICE](NOTICE).
+- **Licence:** FlameBound's original code is released under the [Apache License 2.0](LICENSE); see also [NOTICE](NOTICE).
 - No NASA logos or branding are used. Use of NASA data does not imply NASA endorsement.
