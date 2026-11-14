@@ -9,7 +9,7 @@
     "lint": "eslint",
     "test": "node --test --experimental-strip-types tests/*.test.ts",
     "robustness": "node --experimental-strip-types scripts/robustness.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "next typegen && tsc --noEmit"
   },
   "dependencies": {
     "next": "16.4.6",
