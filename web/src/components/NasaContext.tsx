@@ -9,6 +9,10 @@ const HEADINGS: Record<string, { title: string; lede: string }> = {
     title: "What NASA says about 1 g screening",
     lede: "Spacecraft materials are screened with an upward-burning test on Earth. NASA's own flight investigations question whether that is conservative in microgravity:",
   },
+  detection: {
+    title: "What NASA says about smoke detection in microgravity",
+    lede: "Spacecraft smoke detectors were designed with smoke made on Earth. NASA flew SAME and SAME-R to measure smoke made in microgravity:",
+  },
   suppression: {
     title: "What NASA says about suppression in microgravity",
     lede: "Suppression limits measured on Earth assume buoyant convection. NASA's flight investigations set out to measure what changes without it:",

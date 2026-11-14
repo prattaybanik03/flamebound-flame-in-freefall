@@ -16,7 +16,6 @@ test("every NASA quote appears verbatim in its PSI record, with the right DOI", 
   }
 });
 
-test("both scored pillars have NASA context", () => {
-  assert.ok(FINDINGS.some((f) => f.pillar === "flammability"));
-  assert.ok(FINDINGS.some((f) => f.pillar === "suppression"));
+test("every pillar has NASA context", () => {
+  for (const p of ["flammability", "suppression", "detection"]) assert.ok(FINDINGS.some((f) => f.pillar === p), p);
 });

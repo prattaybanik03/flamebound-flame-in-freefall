@@ -85,7 +85,7 @@ export default function Controls({ target, onChange }: Props) {
     <section aria-label="Target conditions" className="flex flex-col gap-5 rounded-lg border border-slate-800 bg-slate-900/50 p-4">
       {/* Pillar tabs */}
       <div role="tablist" aria-label="Pillar" className="flex flex-wrap gap-2">
-        {(["flammability", "suppression"] as const).map((p) => (
+        {(["flammability", "suppression", "detection"] as const).map((p) => (
           <button
             key={p}
             type="button"
@@ -99,18 +99,6 @@ export default function Controls({ target, onChange }: Props) {
             {p}
           </button>
         ))}
-        <span title="Coming: SAME / SAME-R smoke data">
-          <button
-            type="button"
-            role="tab"
-            disabled
-            aria-selected={false}
-            aria-label="Detection (coming: SAME / SAME-R smoke data)"
-            className="cursor-not-allowed rounded-md bg-slate-800/50 px-3 py-1.5 text-sm font-medium text-slate-600"
-          >
-            Detection
-          </button>
-        </span>
       </div>
 
       {/* Presets */}

@@ -138,6 +138,13 @@ def outcome_for(inv_id: str, raw: dict) -> dict | None:
         return {"category": None, "fields": {"Burn time (s)": g("Burn Time (s)"), "Flow direction": g("Flow Direction")}}
     if inv_id == "PSI-100":
         return {"category": None, "fields": {"Flow direction": g("Direction")}}
+    if inv_id == "PSI-101":  # SAME-R: how the smoke was generated (conditions, not detector results)
+        return {"category": None, "fields": {
+            "Description": g("Description"), "Heater level (Rt/R0)": g("Rt/R0"),
+            "Duration (s)": g("Duration (sec)"), "Net aging time (s)": g("Net aging time (sec)")}}
+    if inv_id == "PSI-102":  # SAME
+        return {"category": None, "fields": {
+            "Weight loss rate (mg/min)": g("Weight loss rate (mg/min)"), "Aging duration (min)": g("Aging Duration (minutes)")}}
     if inv_id == "PSI-20":
         return {"category": None, "fields": {"Flames ignited (that day)": g("Flames Ignited"),
                                              "Burner size (mm)": g("Burner Size (mm)")}}

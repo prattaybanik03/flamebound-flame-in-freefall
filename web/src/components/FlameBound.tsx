@@ -19,6 +19,7 @@ import SiBriefing from "./SiBriefing";
 import NasaContext from "./NasaContext";
 import ValidationPanel from "./ValidationPanel";
 import ReportButtons from "./ReportButtons";
+import DetectionView from "./DetectionView";
 
 const DATA_URL = "/data/flamebound.json";
 const MATERIAL_KEYS: ReadonlySet<string> = new Set(MATERIAL_OPTIONS.map((m) => m.key));
@@ -144,7 +145,7 @@ export default function FlameBound() {
           >
             Validation
           </a>
-          {bundle && <ReportButtons target={target} ranked={ranked} hazard={hazard} builtOn={bundle.builtOn} />}
+          {bundle && target.pillar !== "detection" && <ReportButtons target={target} ranked={ranked} hazard={hazard} builtOn={bundle.builtOn} />}
         </nav>
       </header>
 
@@ -168,43 +169,52 @@ export default function FlameBound() {
         </p>
       ) : (
         <>
-          {hazard && (
-            <HazardBanner
-              hazard={hazard}
-              records={bundle.records}
-              investigations={bundle.investigations}
-              target={target}
-            />
+          {target.pillar === "detection" ? (
+            <>
+              <NasaContext target={target} />
+              <DetectionView bundle={bundle} target={target} onChange={(patch) => setTarget((t) => ({ ...t, ...patch }))} />
+            </>
+          ) : (
+            <>
+            {hazard && (
+              <HazardBanner
+                hazard={hazard}
+                records={bundle.records}
+                investigations={bundle.investigations}
+                target={target}
+              />
+            )}
+            <Headline best={best} target={target} />
+            <SiBriefing target={target} />
+            <RegimeMap bundle={bundle} target={target} highlight={highlight} />
+            <NasaContext target={target} />
+            {/* The 1 g screening question is about NASA-STD-6001 flammability, so the card shows on Flammability only. */}
+            {verdict && target.pillar === "flammability" && <VerdictCard verdict={verdict} />}
+            <section aria-label="Ranked NASA records" className="flex flex-col gap-4">
+              <h2 className="text-lg font-semibold capitalize text-slate-100">{target.pillar} matches</h2>
+              {activeCards.length === 0 && (
+                <p className="text-sm text-slate-400">No {target.pillar} investigation in the PSI data is available to match.</p>
+              )}
+              {activeCards.map((s, i) => (
+                <ResultCard key={s.record.id} scored={s} rank={ranked.indexOf(s) + 1} next={activeCards[i + 1] ?? null} target={target} />
+              ))}
+              {otherCards.length > 0 && (
+                <>
+                  <h2 className="mt-4 text-lg font-semibold text-slate-100">Other pillars (supporting evidence)</h2>
+                  {otherCards.map((s, i) => (
+                    <ResultCard
+                      key={s.record.id}
+                      scored={s}
+                      rank={ranked.indexOf(s) + 1}
+                      next={otherCards[i + 1] ?? null}
+                      target={target}
+                    />
+                  ))}
+                </>
+              )}
+            </section>
+            </>
           )}
-          <Headline best={best} target={target} />
-          <SiBriefing target={target} />
-          <RegimeMap bundle={bundle} target={target} highlight={highlight} />
-          <NasaContext target={target} />
-          {/* The 1 g screening question is about NASA-STD-6001 flammability, so the card shows on Flammability only. */}
-          {verdict && target.pillar === "flammability" && <VerdictCard verdict={verdict} />}
-          <section aria-label="Ranked NASA records" className="flex flex-col gap-4">
-            <h2 className="text-lg font-semibold capitalize text-slate-100">{target.pillar} matches</h2>
-            {activeCards.length === 0 && (
-              <p className="text-sm text-slate-400">No {target.pillar} investigation in the PSI data is available to match.</p>
-            )}
-            {activeCards.map((s, i) => (
-              <ResultCard key={s.record.id} scored={s} rank={ranked.indexOf(s) + 1} next={activeCards[i + 1] ?? null} target={target} />
-            ))}
-            {otherCards.length > 0 && (
-              <>
-                <h2 className="mt-4 text-lg font-semibold text-slate-100">Other pillars (supporting evidence)</h2>
-                {otherCards.map((s, i) => (
-                  <ResultCard
-                    key={s.record.id}
-                    scored={s}
-                    rank={ranked.indexOf(s) + 1}
-                    next={otherCards[i + 1] ?? null}
-                    target={target}
-                  />
-                ))}
-              </>
-            )}
-          </section>
           <ValidationPanel
             bundle={bundle}
             onOpen={(t) => {

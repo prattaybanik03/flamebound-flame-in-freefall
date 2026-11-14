@@ -12,6 +12,10 @@ test("a target survives a round trip through the URL", () => {
 });
 
 test("invalid or out-of-range values are ignored", () => {
-  const p = targetFromSearch("o2=500&kpa=-3&flow=abc&mat=uranium&g=0.5&dir=sideways&pillar=detection", MATS);
+  const p = targetFromSearch("o2=500&kpa=-3&flow=abc&mat=uranium&g=0.5&dir=sideways&pillar=fundamentals", MATS);
   assert.deepEqual(p, {});
+});
+
+test("detection scenarios are shareable", () => {
+  assert.equal(targetFromSearch("pillar=detection", MATS).pillar, "detection");
 });

@@ -4,7 +4,7 @@
 // the default, so a hand-edited link can never produce an out-of-range target.
 import type { FlowDirection, Gravity, Target } from "./types";
 
-const PILLARS = ["flammability", "suppression"] as const;
+const PILLARS = ["flammability", "suppression", "detection"] as const;
 const DIRECTIONS: FlowDirection[] = ["opposed", "concurrent", "coflow", "quiescent"];
 const GRAVITIES: Gravity[] = [0, 0.16, 0.38, 1];
 

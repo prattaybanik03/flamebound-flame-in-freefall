@@ -29,6 +29,8 @@ export const MATERIAL_OPTIONS: MaterialOption[] = [
   { key: "nomex", label: "Nomex", group: "Solids" },
   { key: "silicone", label: "Silicone", group: "Solids" },
   { key: "kapton", label: "Kapton", group: "Solids" },
+  { key: "pyrell", label: "Pyrell foam", group: "Solids" },
+  { key: "lampwick", label: "Lampwick", group: "Solids" },
   { key: "teflon", label: "Teflon", group: "Solids" },
   { key: "heptane", label: "n-Heptane", group: "Liquids" },
   { key: "methanol", label: "Methanol", group: "Liquids" },

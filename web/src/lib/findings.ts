@@ -13,7 +13,7 @@ export interface Finding {
   fieldLabel: string;
   quote: string;
   doi: string;
-  pillar: "flammability" | "suppression";
+  pillar: "flammability" | "suppression" | "detection";
 }
 
 export const FINDINGS: Finding[] = [
@@ -82,6 +82,28 @@ export const FINDINGS: Finding[] = [
     "doi": "10.60555/mbq8-0451",
     "pillar": "suppression",
     "fieldLabel": "approach"
+  },
+  {
+    "id": "same-detector",
+    "psi": "PSI-102",
+    "acronym": "SAME",
+    "title": "Smoke and Aerosol Measurement Experiment",
+    "field": "research_impacts",
+    "fieldLabel": "research impacts",
+    "quote": "The SAME experiment will provide technology for an advanced fire detector for future spacecraft that will be used for long duration missions. SAME will provide quantitative data on the sensitivity of these detectors to reduced gravity smokes that will allow evaluation of the adequacy of these existing technologies using relevant data.",
+    "doi": "10.60555/gd4k-8h62",
+    "pillar": "detection"
+  },
+  {
+    "id": "same-objective",
+    "psi": "PSI-102",
+    "acronym": "SAME",
+    "title": "Smoke and Aerosol Measurement Experiment",
+    "field": "objective",
+    "fieldLabel": "objective",
+    "quote": "One of the major goals of this investigation was to quantify the sizes that the liquid smoke particulate achieves in low gravity and to relate the droplet size distribution to the smoke generation and smoke transport conditions in the experiment.",
+    "doi": "10.60555/gd4k-8h62",
+    "pillar": "detection"
   }
 ];
 

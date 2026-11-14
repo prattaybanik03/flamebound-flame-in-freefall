@@ -7,7 +7,7 @@
   <img alt="Challenge: Flame in Freefall" src="https://img.shields.io/badge/challenge-Flame%20in%20Freefall-e8590c">
   <img alt="Melbourne Local Event" src="https://img.shields.io/badge/event-Melbourne-334155">
   <img alt="License: Apache-2.0" src="https://img.shields.io/badge/license-Apache--2.0-blue">
-  <img alt="Tests: 64 passing" src="https://img.shields.io/badge/tests-64%20passing-2f9e44">
+  <img alt="Tests: 65 passing" src="https://img.shields.io/badge/tests-65%20passing-2f9e44">
 </p>
 
 <p align="center">
@@ -44,6 +44,7 @@ Pick a mission atmosphere (ISS, lunar base or rover, exploration atmosphere, EVA
 | **Shareable scenarios** | The URL encodes the whole scenario, so a colleague or judge opens the exact view in one click |
 | **NASA's own words on 1 g screening** | Verbatim statements from the BASS, BASS-II, SAFFIRE-II and FLEX records, with DOIs, on why Earth screening may not be conservative in microgravity. A test checks every quote character for character against the PSI data |
 | **Evidence report** | One click prints (or saves as PDF) a design-review report, or downloads it as Markdown: the scenario, coverage status, the closest NASA records with their verbatim cells, and data citations in text and BibTeX |
+| **Smoke-detection evidence** | The Detection pillar lists NASA's microgravity smoke tests (SAME, SAME-R) for the selected material, with airflow, heater level and aging time verbatim, and NASA's stated aim for spacecraft fire detectors. Unscored, because the tables hold no detector results |
 | **Validation you can rerun** | Seven acceptance scenarios re-run live in the browser against what each must show, with one-click Open to inspect any of them |
 
 ![Headline match score, the SI evidence briefing panel and the flammability regime map (O₂ vs cabin airflow) for a silicone lunar-base cabin](docs/images/screenshot-evidence.jpg)
@@ -110,7 +111,7 @@ While it is active, no conclusion is drawn about the engineer's cabin.
 
 | Check | Result |
 | --- | --- |
-| Automated tests (`npm test`) | 64 passing: scoring rules, missing-data handling, levels and ranges, the O₂ gate, verdict gating, explanation wording, URL round trips, and the SI firewall (uncited sentences, invented numbers, unknown citations, safety verdicts, hazard-first wording, sentence splitting around decimals), provider routing and request formats for Anthropic and OpenAI-compatible APIs, the seven acceptance scenarios, verbatim NASA quotes, and the evidence report |
+| Automated tests (`npm test`) | 65 passing: scoring rules, missing-data handling, levels and ranges, the O₂ gate, verdict gating, explanation wording, URL round trips, and the SI firewall (uncited sentences, invented numbers, unknown citations, safety verdicts, hazard-first wording, sentence splitting around decimals), provider routing and request formats for Anthropic and OpenAI-compatible APIs, the seven acceptance scenarios, verbatim NASA quotes, and the evidence report |
 | Weight robustness (`npm run robustness`) | Each weight ×0.8 and ×1.2 (renormalised), 6 scenarios, 60 runs. Top match unchanged in **58/60**, top-3 order in 55/60, hazard decision in **60/60**. The two changes are a near-tie (ACME BRE 60.5% vs SAFFIRE-II 58.8%, Nomex at 34% O₂), both below the threshold either way |
 | SI briefing, live model (Claude Haiku 5.5, effort `low`) | 7 of 7 acceptance scenarios produced a briefing that passed the firewall (6–10 s each). Each was read against its NASA records: hazards stated first, every number traceable to a NASA cell, no safety verdicts. A draft that fails verification gets one correction attempt with its specific problems; if that fails too, the labelled deterministic brief is shown |
 | Accessibility (axe-core, WCAG 2.1 AA) | 0 violations on the hazard, ISS-baseline and suppression scenarios; all text meets AA contrast (small helper text 5.8:1 on panels), visible keyboard focus, and the only animation stops under reduced-motion |
@@ -133,7 +134,7 @@ While it is active, no conclusion is drawn about the engineer's cabin.
 - PSI holds no partial-gravity combustion data. Microgravity and 1 g results bound, but do not establish, lunar or Martian behaviour.
 - Solid-material tables do not record pressure. BASS-II logged airflow as fan settings rather than cm/s, so those records appear on the map's side strip, placed by O₂ only.
 - Weights, scales, the 65% threshold and the ±2-point gate are documented design choices, not validated safety limits. BCMS measures how closely NASA's data covers a condition, **not fire safety**.
-- The Detection pillar (SAME / SAME-R smoke data) is not yet scored.
+- Detection is shown, not scored. NASA's SAME and SAME-R tables record how each smoke sample was made (material, airflow, heater level, aging time) but not detector responses; particle-size results are in the publications. FlameBound lists the tests for the selected material with their conditions verbatim, nearest airflow first.
 
 ## Run it
 
@@ -148,7 +149,7 @@ python scripts/build_app_data.py
 cd web
 npm install
 cp .env.example .env.local   # optional: add ONE key (Anthropic, OpenAI, DeepSeek or Gemini) for the SI briefing
-npm test               # 64 tests
+npm test               # 65 tests
 npm run robustness     # weight-sensitivity check
 npm run dev            # http://localhost:3000
 ```
