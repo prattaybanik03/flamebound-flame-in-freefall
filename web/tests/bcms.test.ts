@@ -129,3 +129,37 @@ test("refusal threshold uses the active pillar: lunar-base PMMA flammability rai
   assert.ok(bestFlam.bcms < REFUSAL_THRESHOLD);
   assert.equal(hazard(r, t)?.level, "hazard");
 });
+
+const thicknessFact = (v: ReturnType<typeof buildVerdict>, ref: string) =>
+  v.evidence.find((e) => e.recordRef === ref)?.facts.find((f) => f.label.startsWith("Thickness"));
+
+test("suspect source values keep their status in verdict facts (default SIBAL 2-5, 2-6)", () => {
+  const r = rank(bundle.records, bundle.investigations, ISS);
+  const all = bundle.records.map((x) => scoreRecord(x, inv(x.inv), ISS));
+  const v = buildVerdict(r, all, "sibal", hazard(r, ISS)?.level ?? null);
+  for (const ref of ["2-5", "2-6"]) {
+    const f = thicknessFact(v, ref);
+    assert.ok(f, `SAFFIRE-II ${ref} thickness fact present`);
+    assert.equal(f.status, "suspect");
+    assert.equal(f.value, "037 mm"); // raw kept for audit, never normalised
+  }
+});
+
+test("suspect thickness on Silicone 2-4 is flagged; recorded 2-1 is not", () => {
+  const t: Target = { ...ISS, materialKey: "silicone" };
+  const r = rank(bundle.records, bundle.investigations, t);
+  const all = bundle.records.map((x) => scoreRecord(x, inv(x.inv), t));
+  const v = buildVerdict(r, all, "silicone", hazard(r, t)?.level ?? null);
+  assert.equal(thicknessFact(v, "2-4")?.status, "suspect");
+  assert.equal(thicknessFact(v, "2-1")?.status, "recorded");
+});
+
+test("partial-gravity warning never claims microgravity/1 g results bound the case", () => {
+  const t: Target = { ...ISS, gravity: 0.16 };
+  const h = hazard(rank(bundle.records, bundle.investigations, t), t)!;
+  const text = h.reasons.join(" ");
+  assert.ok(!/bound this case/i.test(text));
+  assert.match(text, /contextual evidence/);
+  assert.match(text, /LUCI/);
+  assert.match(text, /FM2/);
+});

@@ -26,7 +26,23 @@ function Evidence({ e }: { e: VerdictEvidence }) {
             {e.facts.map((f) => (
               <div key={f.label} className="contents">
                 <dt className="text-slate-500">{f.label}</dt>
-                <dd className="text-slate-200">{f.value}</dd>
+                <dd className="text-slate-200">
+                  {f.status === "suspect" ? (
+                    <>
+                      <span className="rounded border border-amber-600 bg-amber-500/15 px-1 font-medium text-amber-300">
+                        Withheld: suspect source value
+                      </span>{" "}
+                      <span className="text-slate-500">(raw &quot;{f.value}&quot;, not used)</span>
+                    </>
+                  ) : f.status === "unparsed" ? (
+                    <>
+                      <span className="rounded border border-slate-600 px-1 text-slate-300">Unreadable source value</span>{" "}
+                      <span className="text-slate-500">(raw &quot;{f.value}&quot;)</span>
+                    </>
+                  ) : (
+                    f.value
+                  )}
+                </dd>
               </div>
             ))}
           </dl>

@@ -65,7 +65,9 @@ export default function ResultCard({ scored, rank, next }: { scored: Scored; ran
         <header className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="font-mono text-sm text-slate-500">#{rank}</span>
+              <span className="font-mono text-sm text-slate-500" title="Overall rank by BCMS across all pillars">
+                #{rank}
+              </span>
               <h3 className="text-lg font-semibold text-slate-100">{inv.acronym}</h3>
               <span className={`rounded border px-1.5 py-0.5 text-xs capitalize ${PILLAR_BADGE[inv.pillar]}`}>{inv.pillar}</span>
               <span className="rounded border border-slate-700 px-1.5 py-0.5 text-xs text-slate-300">

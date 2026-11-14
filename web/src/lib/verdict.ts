@@ -15,6 +15,12 @@
 //    still air) are listed as related context and never make a verdict "available".
 
 import type { Scored } from "./bcms";
+import type { Condition, Status } from "./types";
+
+/** A condition cell as a fact, keeping its audited status. */
+function cellFact(label: string, c: Condition): { label: string; value: string; status: Status } {
+  return { label, value: c.raw || "not recorded", status: c.status };
+}
 
 export interface VerdictEvidence {
   kind: "table";
@@ -26,8 +32,11 @@ export interface VerdictEvidence {
   recordRef: string;
   table: string;
   row: number;
-  /** Values copied verbatim from NASA's table. */
-  facts: { label: string; value: string }[];
+  /**
+   * Values copied verbatim from NASA's table. `status` is carried for condition cells so a
+   * `suspect` (withheld) or `unparsed` value is never presented as a usable NASA value.
+   */
+  facts: { label: string; value: string; status?: Status }[];
   /** Differences between this NASA record and the engineer's target (canonical units). */
   targetDeltas: { label: string; value: string }[];
   /** Plain reading of THIS record only, when the table makes it unambiguous. */
@@ -109,9 +118,9 @@ function saffire2Evidence(s: Scored): VerdictEvidence | null {
     recordRef: s.record.ref, table: s.record.table, row: s.record.row,
     facts: [
       { label: "Material", value: s.record.material },
-      { label: "Thickness (NASA cell)", value: s.record.thickness.raw || "not recorded" },
-      { label: "O₂ (NASA cell, %)", value: s.record.o2.raw || "not recorded" },
-      { label: "Airflow (NASA cell)", value: s.record.flow.raw || "not recorded" },
+      cellFact("Thickness (NASA cell)", s.record.thickness),
+      cellFact("O₂ (NASA cell, %)", s.record.o2),
+      cellFact("Airflow (NASA cell)", s.record.flow),
       { label: "Flow direction", value: f["Flow direction"] || "not recorded" },
       { label: "Microgravity burn length", value: ug || "not recorded" },
       { label: "Microgravity spread", value: f["Microgravity spread"] || "not recorded" },

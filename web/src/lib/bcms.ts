@@ -162,7 +162,7 @@ export function hazard(ranked: Scored[], t: Target): Hazard | null {
   if (t.gravity === 0.16 || t.gravity === 0.38) {
     reasons.push(
       `PSI contains no partial-gravity combustion data (${t.gravity === 0.16 ? "Moon, 0.16 g" : "Mars, 0.38 g"}). ` +
-        "Microgravity and 1 g results only bound this case. Partial-gravity data is expected from NASA's LUCI and FM2 experiments.",
+        "Microgravity and 1 g results are contextual evidence; they do not establish performance at this gravity. Partial-gravity data is expected from NASA's LUCI and FM2 experiments.",
     );
   }
   // Threshold checks the best match in the ACTIVE pillar (locked Sat 11:20), so a record

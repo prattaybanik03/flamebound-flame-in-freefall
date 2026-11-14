@@ -46,12 +46,23 @@ export default function PyroVector() {
     });
     return buildVerdict(ranked, allScored, target.materialKey, hazard?.level ?? null);
   }, [bundle, ranked, target, hazard]);
-  const highlight = useMemo(() => new Set(ranked.slice(0, 8).map((s) => s.record.id)), [ranked]);
   // Result cards (A4): top 8 overall, active-pillar first, then other pillars as supporting evidence.
-  const [activeCards, otherCards] = useMemo(() => {
+  // The headline's record (best in the active pillar) is always shown: if it falls outside
+  // the top 8, it takes the 8th slot. Order and BCMS within each section stay as ranked.
+  const displayed = useMemo(() => {
     const top = ranked.slice(0, 8);
-    return [top.filter((s) => s.investigation.pillar === target.pillar), top.filter((s) => s.investigation.pillar !== target.pillar)];
-  }, [ranked, target.pillar]);
+    if (!best || top.includes(best)) return top;
+    return [...ranked.slice(0, 7), best];
+  }, [ranked, best]);
+  const [activeCards, otherCards] = useMemo(
+    () => [
+      displayed.filter((s) => s.investigation.pillar === target.pillar),
+      displayed.filter((s) => s.investigation.pillar !== target.pillar),
+    ],
+    [displayed, target.pillar],
+  );
+  // Map highlights exactly the records shown as cards.
+  const highlight = useMemo(() => new Set(displayed.map((s) => s.record.id)), [displayed]);
 
   useEffect(() => {
     const ctrl = new AbortController();
@@ -123,10 +134,10 @@ export default function PyroVector() {
           <section aria-label="Ranked NASA records" className="flex flex-col gap-4">
             <h2 className="text-lg font-semibold capitalize text-slate-100">{target.pillar} matches</h2>
             {activeCards.length === 0 && (
-              <p className="text-sm text-slate-400">No {target.pillar} investigation is in the top 8.</p>
+              <p className="text-sm text-slate-400">No {target.pillar} investigation in the PSI data is available to match.</p>
             )}
             {activeCards.map((s, i) => (
-              <ResultCard key={s.record.id} scored={s} rank={i + 1} next={activeCards[i + 1] ?? null} />
+              <ResultCard key={s.record.id} scored={s} rank={ranked.indexOf(s) + 1} next={activeCards[i + 1] ?? null} />
             ))}
             {otherCards.length > 0 && (
               <>
@@ -135,7 +146,7 @@ export default function PyroVector() {
                   <ResultCard
                     key={s.record.id}
                     scored={s}
-                    rank={activeCards.length + i + 1}
+                    rank={ranked.indexOf(s) + 1}
                     next={otherCards[i + 1] ?? null}
                   />
                 ))}

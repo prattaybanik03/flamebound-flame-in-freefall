@@ -34,7 +34,16 @@ const OUTCOME_LABEL: Record<string, string> = {
 const NO_CATEGORY = "Outcome not categorised (hover for record)";
 const INV_COLOR = ["#f59e0b", "#ef4444", "#10b981", "#eab308", "#ec4899", "#6366f1"];
 
-interface Pt { r: PsiRecord; inv: Investigation; x: number | null; y: number; color: string; label: string }
+/** NASA range extent for a `range` value with distinct ends; drawn as a bar so the midpoint is not mistaken for an exact value. */
+const extent = (c: Condition): [number, number] | null =>
+  c.status === "range" && c.min !== null && c.max !== null && c.min !== c.max
+    ? [Math.min(c.min, c.max), Math.max(c.min, c.max)]
+    : null;
+
+interface Pt {
+  r: PsiRecord; inv: Investigation; x: number | null; y: number; color: string; label: string;
+  xr: [number, number] | null; yr: [number, number] | null;
+}
 
 export default function RegimeMap({
   bundle, target, highlight,
@@ -56,14 +65,15 @@ export default function RegimeMap({
         if (!invColor.has(inv.id)) invColor.set(inv.id, INV_COLOR[invColor.size % INV_COLOR.length]);
         const color = invColor.get(inv.id)!;
         legend.set(inv.acronym, color);
-        pts.push({ r, inv, x: mid(r.flow), y, color, label: inv.acronym });
+        const x = mid(r.flow);
+        pts.push({ r, inv, x, y, color, label: inv.acronym, xr: x === null ? null : extent(r.flow), yr: extent(r.o2) });
       } else {
         const x = mid(r.pressure);
         if (x === null) continue;
         const cat = r.outcome?.category ?? "";
         const color = OUTCOME_COLOR[cat] ?? "#64748b";
         legend.set(OUTCOME_LABEL[cat] ?? NO_CATEGORY, color);
-        pts.push({ r, inv, x, y, color, label: inv.acronym });
+        pts.push({ r, inv, x, y, color, label: inv.acronym, xr: extent(r.pressure), yr: extent(r.o2) });
       }
     }
     return { pts, legend };
@@ -72,8 +82,8 @@ export default function RegimeMap({
   // Geometry
   const W = 640, H = 340, L = flam ? 104 : 48, R = 16, T = 16, B = 40;
   // Axes extend to cover every plotted point and the target, so no NASA point is pinned to an edge.
-  const dataXMax = pts.reduce((m, p) => (p.x === null ? m : Math.max(m, p.x)), 0);
-  const dataYMax = pts.reduce((m, p) => Math.max(m, p.y), 0);
+  const dataXMax = pts.reduce((m, p) => (p.x === null ? m : Math.max(m, p.xr?.[1] ?? p.x)), 0);
+  const dataYMax = pts.reduce((m, p) => Math.max(m, p.yr?.[1] ?? p.y), 0);
   const xMax = flam ? 50 : Math.ceil(Math.max(320, dataXMax, target.pressureKPa) / 50) * 50;
   const yMin = 10, yMax = Math.min(100, Math.ceil(Math.max(45, dataYMax, target.o2Pct + 5) / 5) * 5);
   const X = (v: number) => L + (Math.min(v, xMax) / xMax) * (W - L - R);
@@ -89,7 +99,10 @@ export default function RegimeMap({
         <h3 className="text-sm font-semibold text-slate-100">
           {flam ? "Flammability regime: O₂ vs cabin airflow" : "Suppression regime: O₂ vs pressure"}
         </h3>
-        <span className="text-xs text-slate-400">Every point is a NASA PSI record · crosshair = your cabin</span>
+        <span className="text-xs text-slate-400">
+          Every point is a NASA PSI record; ranged values show NASA&apos;s range as a bar with the dot at its midpoint ·
+          crosshair = your cabin
+        </span>
       </div>
       <svg viewBox={`0 0 ${W} ${H}`} className="w-full" role="img"
         aria-label={flam ? "Oxygen versus airflow for NASA flammability records" : "Oxygen versus pressure for NASA suppression records"}>
@@ -119,10 +132,16 @@ export default function RegimeMap({
           const hl = highlight.has(p.r.id);
           // Strip spans x = 8..L-16; keep even a highlighted (r = 6) point inside it.
           const cx = p.x === null ? 18 + ((p.r.row * 37) % (L - 48)) : X(p.x);
+          const cy = Y(p.y);
           return (
-            <circle key={p.r.id} cx={cx} cy={Y(p.y)} r={hl ? 6 : 3.2}
-              fill={p.color} fillOpacity={hl ? 1 : 0.55} stroke={hl ? "#fff" : "none"} strokeWidth={1.5}
-              onMouseEnter={() => setHover(p)} onMouseLeave={() => setHover(null)} />
+            <g key={p.r.id}>
+              {/* NASA range bars: the dot is the midpoint of the range, not a measured value */}
+              {p.yr && <line x1={cx} x2={cx} y1={Y(p.yr[0])} y2={Y(p.yr[1])} stroke={p.color} strokeWidth={1.5} strokeOpacity={0.9} />}
+              {p.xr && <line x1={X(p.xr[0])} x2={X(p.xr[1])} y1={cy} y2={cy} stroke={p.color} strokeWidth={1.5} strokeOpacity={0.9} />}
+              <circle cx={cx} cy={cy} r={hl ? 6 : 3.2}
+                fill={p.color} fillOpacity={hl ? 1 : 0.55} stroke={hl ? "#fff" : "none"} strokeWidth={1.5}
+                onMouseEnter={() => setHover(p)} onMouseLeave={() => setHover(null)} />
+            </g>
           );
         })}
         {/* target crosshair */}
@@ -141,8 +160,10 @@ export default function RegimeMap({
       </div>
       <p className="mt-2 min-h-[2.5rem] text-xs text-slate-400">
         {hover
-          ? `${hover.inv.acronym} · ${hover.r.ref || "row " + hover.r.row} · ${hover.r.material || "material not recorded"} · O₂ ${hover.r.o2.raw} (${hover.r.o2.col})` +
-            (flam ? ` · airflow ${hover.r.flow.raw || "not recorded in cm/s"}` : ` · pressure ${hover.r.pressure.raw} (${hover.r.pressure.col})`) +
+          ? `${hover.inv.acronym} · ${hover.r.ref || "data row " + (hover.r.row + 1)} · ${hover.r.material || "material not recorded"} · O₂ ${hover.r.o2.raw} (${hover.r.o2.col}; ${hover.r.o2.status})` +
+            (flam
+              ? ` · airflow ${hover.r.flow.raw ? `${hover.r.flow.raw} (${hover.r.flow.status})` : "not recorded in cm/s"}`
+              : ` · pressure ${hover.r.pressure.raw} (${hover.r.pressure.col}; ${hover.r.pressure.status})`) +
             (hover.r.outcome?.category ? ` · outcome: ${OUTCOME_LABEL[hover.r.outcome.category] ?? hover.r.outcome.category}` : "")
           : flam
             ? "Hover a point for its NASA record. Records whose airflow NASA logged only as fan settings (BASS-II) sit in the left strip, placed by O₂ only."
