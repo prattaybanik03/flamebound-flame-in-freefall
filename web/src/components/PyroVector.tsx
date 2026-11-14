@@ -5,7 +5,9 @@
 import { useEffect, useMemo, useState } from "react";
 import type { Bundle, Target } from "@/lib/types";
 import { DEFAULT_TARGET } from "@/lib/presets";
-import { hazard as computeHazard, rank } from "@/lib/bcms";
+import { hazard as computeHazard, rank, scoreRecord } from "@/lib/bcms";
+import { buildVerdict } from "@/lib/verdict";
+import VerdictCard from "./VerdictCard";
 import Controls from "./Controls";
 import Headline from "./Headline";
 import HazardBanner from "./HazardBanner";
@@ -32,6 +34,16 @@ export default function PyroVector() {
   const hazard = useMemo(() => (bundle ? computeHazard(ranked, target) : null), [bundle, ranked, target]);
   // Headline is the best match in the ACTIVE pillar (locked Sat 11:20).
   const best = useMemo(() => ranked.find((s) => s.investigation.pillar === target.pillar) ?? null, [ranked, target.pillar]);
+  // Verdict (A5): every record scored, then cited evidence only, gated by the hazard (amendment 4).
+  const verdict = useMemo(() => {
+    if (!bundle) return null;
+    const byId = new Map(bundle.investigations.map((i) => [i.id, i]));
+    const allScored = bundle.records.flatMap((r) => {
+      const inv = byId.get(r.inv);
+      return inv ? [scoreRecord(r, inv, target)] : [];
+    });
+    return buildVerdict(ranked, allScored, target.materialKey, hazard?.level ?? null);
+  }, [bundle, ranked, target, hazard]);
   // Result cards (A4): top 8 overall, active-pillar first, then other pillars as supporting evidence.
   const [activeCards, otherCards] = useMemo(() => {
     const top = ranked.slice(0, 8);
@@ -103,6 +115,7 @@ export default function PyroVector() {
             />
           )}
           <Headline best={best} target={target} />
+          {verdict && <VerdictCard verdict={verdict} />}
           <section aria-label="Ranked NASA records" className="flex flex-col gap-4">
             <h2 className="text-lg font-semibold capitalize text-slate-100">{target.pillar} matches</h2>
             {activeCards.length === 0 && (
