@@ -7,7 +7,7 @@
   <img alt="Challenge: Flame in Freefall" src="https://img.shields.io/badge/challenge-Flame%20in%20Freefall-e8590c">
   <img alt="Melbourne Local Event" src="https://img.shields.io/badge/event-Melbourne-334155">
   <img alt="License: Apache-2.0" src="https://img.shields.io/badge/license-Apache--2.0-blue">
-  <img alt="Tests: 35 passing" src="https://img.shields.io/badge/tests-35%20passing-2f9e44">
+  <img alt="Tests: 35 passing" src="https://img.shields.io/badge/tests-42%20passing-2f9e44">
 </p>
 
 <p align="center">
@@ -40,6 +40,7 @@ Pick a mission atmosphere (ISS, lunar base or rover, exploration atmosphere, EVA
 | **Extrapolation Hazard** | Raised when coverage is weak, when the best match was tested in a different oxygen class, or when Moon or Mars gravity is selected. It lists the nearest recorded NASA conditions with exact differences |
 | **Regime maps** | Every relevant NASA record against the target crosshair. Flammability shows O₂ vs airflow; Suppression shows O₂ vs pressure, coloured by NASA's recorded outcome |
 | **Cited 1 g vs µg evidence** | For materials NASA tested both ways (SAFFIRE-II), the records side by side, with no conclusion drawn when the hazard is active |
+| **SI evidence briefing** | Claude Haiku summarises and interprets the top NASA records for the scenario. Every sentence must cite a record, every number must appear in NASA's data, and safety verdicts are rejected. Otherwise a labelled deterministic brief is shown |
 | **Shareable scenarios** | The URL encodes the whole scenario, so a colleague or judge opens the exact view in one click |
 
 ![Regime map and cited 1 g vs microgravity evidence for silicone, with differences from the target](docs/images/screenshot-evidence.jpg)
@@ -53,11 +54,16 @@ flowchart LR
   C --> D["build_app_data.py<br/>pyrovector.json · 1,980 records"]
   D --> E["Browser engine<br/>bcms.ts · verdict.ts"]
   E --> F["UI<br/>hazard gate · evidence cards<br/>regime maps · cited 1 g vs µg"]
+  D --> G["/api/brief (server)<br/>same ranking → evidence pack"]
+  G --> H["Claude Haiku<br/>summarise + interpret"]
+  H --> I["Verification firewall<br/>citations · numbers · no verdicts"]
+  I --> F
 ```
 
 - **Pipeline (Python).** Pulls every investigation and experimental table from NASA's public PSI API. It converts each condition to canonical units (O₂ % by volume, pressure in kPa, airflow in cm/s) through explicit, auditable column mappings. Every value gets a status: `recorded`, `approx`, `range`, `levels`, `footnote`, `not_recorded`, `unparsed` or `suspect`. See [docs/DATA.md](docs/DATA.md).
 - **Engine (TypeScript, in the browser).** Pure functions score, rank, gate and assemble evidence. Ranking is instant, works offline once loaded, and never calls an AI model.
-- **App (Next.js 16, deployed on Vercel).** A static page plus one JSON data bundle. No server, no keys, no tracking.
+- **SI layer (server route, Claude Haiku).** The server recomputes the ranking from the canonical bundle. It sends the model only an evidence pack: the top active-pillar records with their verbatim NASA cells and the hazard reasons. The draft is accepted only if every sentence cites an evidence item, every number appears in the pack, and no safety verdict or recommendation is made. Otherwise the deterministic brief is shown, labelled as such. The API key never reaches the browser, and requests are cached and rate-limited.
+- **App (Next.js 16, deployed on Vercel).** A static page, one JSON data bundle and one server route. No tracking.
 
 ## Method
 
@@ -86,13 +92,14 @@ While it is active, no conclusion is drawn about the engineer's cabin.
 - **Ranges and levels are treated differently.** A range (`21.5–21.7`) matches anywhere inside it. Discrete levels (`21; 26.5; 40`) match only the listed values, never the span between them.
 - **Plans are not results.** FLEX-2's planned test envelopes (O₂ 17–30%, 0.5–3 atm, 0.1–5 cm/s) would match almost any target, so they are shown as context and never ranked.
 - **Partial pressure is context, not a score.** O₂ partial pressure (O₂% × P) is shown beside the controls and on each record. Lunar-base air (30% at 70 kPa) and sea-level air both sit near 21 kPa of O₂, yet the higher mole fraction is what makes materials more flammable. That is why the score and the gate use concentration.
+- **SI interprets; it never decides.** Rankings, scores and the hazard decision are deterministic and testable. SI does what it is good at, turning a page of evidence into a readable engineering brief, and its output is checked against NASA's records before anyone sees it.
 - **Uncontrolled variables are disclosed, not hidden.** Thickness and flow direction strongly affect flame spread, but too few NASA records vary them to score them fairly. They are shown for comparison, and a card warns when NASA's flow direction differs from the one selected.
 
 ## Validation
 
 | Check | Result |
 | --- | --- |
-| Automated tests (`npm test`) | 35 passing: scoring rules, missing-data handling, levels and ranges, the O₂ gate, verdict gating, explanation wording, URL round trips |
+| Automated tests (`npm test`) | 42 passing: scoring rules, missing-data handling, levels and ranges, the O₂ gate, verdict gating, explanation wording, URL round trips, and the SI firewall (uncited sentences, invented numbers, unknown citations, safety verdicts, hazard-first wording) |
 | Weight robustness (`npm run robustness`) | Each weight ×0.8 and ×1.2 (renormalised), 6 scenarios, 60 runs. Top match unchanged in **58/60**, top-3 order in 55/60, hazard decision in **60/60**. The two changes are a near-tie (ACME BRE 60.5% vs SAFFIRE-II 58.8%, Nomex at 34% O₂), both below the threshold either way |
 | Type-check and lint | `tsc` and ESLint clean |
 | Data integrity | No number is shown that is not either a NASA cell (verbatim, with its column) or a published formula result. Physically implausible source values (known table typos) are withheld and flagged |
@@ -126,7 +133,8 @@ python scripts/build_app_data.py
 # Web app (Node 22+)
 cd web
 npm install
-npm test               # 35 tests
+cp .env.example .env.local   # optional: add ANTHROPIC_API_KEY for the SI briefing
+npm test               # 42 tests
 npm run robustness     # weight-sensitivity check
 npm run dev            # http://localhost:3000
 ```
@@ -136,7 +144,8 @@ npm run dev            # http://localhost:3000
 ```text
 scripts/            Python data pipeline (fetch → canonical conditions → app bundle)
 data/               Processed NASA PSI data (raw API responses are regenerated, not committed)
-web/src/lib/        Scoring engine, hazard gate, cited-evidence logic, URL state (pure TypeScript)
+web/src/lib/        Scoring engine, hazard gate, cited-evidence logic, SI evidence pack + firewall, URL state
+web/src/app/api/    SI briefing route (server-side; Claude Haiku)
 web/src/components/ UI: controls, hazard banner, headline, regime map, evidence cards, method panel
 web/tests/          Node test-runner suites
 web/scripts/        Robustness check
@@ -158,12 +167,13 @@ docs/               Data pipeline notes and screenshots
 - **Codex (OpenAI)** independently reviewed the build plan and the app. It wrote the explanation-sentence and numeric-firewall hardening in `web/src/lib/explain.ts`, with its regression tests.
 - Every AI-assisted source file carries an `SI-assisted` header comment.
 - The Next.js scaffold came from `create-next-app` (not AI).
-- **The live app runs no AI model.** Every ranking and number is computed deterministically from NASA's data.
+- **In the live app, SI (Claude Haiku) writes the evidence briefing only.** It never ranks or scores. Each briefing is verified against the cited NASA records, or replaced by a labelled deterministic brief. Every ranking and score is computed deterministically from NASA's data.
 
 ## Data, references and licences
 
 - **Data:** NASA Physical Sciences Informatics, https://psi.nasa.gov, CC0-1.0. All 23 investigations are cited in the app by DOI; see [docs/DATA.md](docs/DATA.md).
 - **Challenge resources:** NASA Combustion Science; A Researcher's Guide to ISS Combustion Science; Apollo 1, Apollo 13 and Mir fire records; NASA spinoffs on firefighter air tanks, smoke detection and protective clothing.
+- **SI model:** Claude Haiku 5.5 (Anthropic), via the Claude API, for the evidence briefing.
 - **Software:** Next.js and React (MIT), TypeScript (Apache-2.0), Tailwind CSS (MIT), ESLint (MIT), Python `requests` (Apache-2.0).
 - **Licence:** PyroVector's original code is released under the [Apache License 2.0](LICENSE); see also [NOTICE](NOTICE).
 - No NASA logos or branding are used. Use of NASA data does not imply NASA endorsement.

@@ -114,8 +114,8 @@ export default function Method({ bundle }: { bundle: Bundle }) {
           directed the AI assistants, reviewed their output and tested the app. Claude (Anthropic) wrote most of the
           code and proposed options for Pratt&apos;s decision; Codex (OpenAI) independently reviewed the plan and app and
           wrote the explanation and numeric-check hardening. SI-assisted source files carry a header comment; the full
-          disclosure is in the project README under &quot;Team and use of AI&quot;. This app runs no SI model: rankings and
-          numbers are computed deterministically from NASA&apos;s data.
+          disclosure is in the project README under &quot;Team and use of AI&quot;. In this app, SI (Claude Haiku) writes the
+          evidence briefing only, verified against the cited NASA records; rankings and scores are deterministic.
         </p>
       </section>
     </footer>

@@ -15,6 +15,7 @@ import Controls from "./Controls";
 import Headline from "./Headline";
 import HazardBanner from "./HazardBanner";
 import ResultCard from "./ResultCard";
+import SiBriefing from "./SiBriefing";
 
 const DATA_URL = "/data/pyrovector.json";
 const MATERIAL_KEYS: ReadonlySet<string> = new Set(MATERIAL_OPTIONS.map((m) => m.key));
@@ -158,6 +159,7 @@ export default function PyroVector() {
             />
           )}
           <Headline best={best} target={target} />
+          <SiBriefing target={target} />
           <RegimeMap bundle={bundle} target={target} highlight={highlight} />
           {/* The 1 g screening question is about NASA-STD-6001 flammability, so the card shows on Flammability only. */}
           {verdict && target.pillar === "flammability" && <VerdictCard verdict={verdict} />}
