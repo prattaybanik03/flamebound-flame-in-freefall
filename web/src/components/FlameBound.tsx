@@ -21,6 +21,8 @@ import ValidationPanel from "./ValidationPanel";
 import ReportButtons from "./ReportButtons";
 import DetectionView from "./DetectionView";
 import AskRecords from "./AskRecords";
+import GapAtlas from "./GapAtlas";
+import { HEADLINE } from "@/lib/atlas";
 
 const DATA_URL = "/data/flamebound.json";
 const MATERIAL_KEYS: ReadonlySet<string> = new Set(MATERIAL_OPTIONS.map((m) => m.key));
@@ -131,6 +133,12 @@ export default function FlameBound() {
             NASA microgravity combustion investigations, matched to your habitat conditions and cited to their DOIs.
             Without gravity, a candle flame burns as a dim blue sphere. FlameBound shows how far NASA&apos;s flight data covers your cabin.
           </p>
+          <p className="mt-3 max-w-2xl rounded-md border-l-4 border-l-[#ff5a4f] bg-slate-900/70 px-3 py-2 text-sm text-slate-200">
+            <span className="font-display text-base text-slate-50">Finding:</span> NASA&apos;s open microgravity fire data covers
+            today&apos;s ISS cabin for {HEADLINE.issCovered} of {HEADLINE.issTotal} common materials, and the Artemis lunar,
+            exploration and EVA atmospheres for {HEADLINE.artemisCovered} of {HEADLINE.artemisTotal}.{" "}
+            <a href="#atlas" className="text-sky-300 underline underline-offset-2 hover:text-sky-200">See the Evidence Gap Atlas</a>
+          </p>
         </div>
         <nav aria-label="Scenario actions" className="flex flex-wrap gap-2 md:max-w-sm md:justify-end">
           <button
@@ -140,6 +148,12 @@ export default function FlameBound() {
           >
             {copied ? "Link copied" : "Copy scenario link"}
           </button>
+          <a
+            href="#atlas"
+            className="rounded-md border border-slate-700 px-3 py-1.5 text-xs text-slate-200 hover:border-orange-400 hover:text-orange-200"
+          >
+            Evidence gaps
+          </a>
           <a
             href="#ask"
             className="rounded-md border border-slate-700 px-3 py-1.5 text-xs text-slate-200 hover:border-orange-400 hover:text-orange-200"
@@ -156,7 +170,9 @@ export default function FlameBound() {
         </nav>
       </header>
 
-      <Controls target={target} onChange={setTarget} />
+      <div id="scenario" className="scroll-mt-4">
+        <Controls target={target} onChange={setTarget} />
+      </div>
 
       {error ? (
         <div role="alert" className="rounded-lg border border-red-900 bg-red-950/40 p-4">
@@ -222,6 +238,13 @@ export default function FlameBound() {
             </section>
             </>
           )}
+          <GapAtlas
+            bundle={bundle}
+            onOpen={(t) => {
+              setTarget(t);
+              document.getElementById("scenario")?.scrollIntoView();
+            }}
+          />
           <AskRecords />
           <ValidationPanel
             bundle={bundle}

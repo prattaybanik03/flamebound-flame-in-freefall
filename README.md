@@ -44,11 +44,25 @@ Pick a mission atmosphere (ISS, lunar base or rover, exploration atmosphere, EVA
 | **Shareable scenarios** | The URL encodes the whole scenario, so a colleague or judge opens the exact view in one click |
 | **NASA's own words on 1 g screening** | Verbatim statements from the BASS, BASS-II, SAFFIRE-II and FLEX records, with DOIs, on why Earth screening may not be conservative in microgravity. A test checks every quote character for character against the PSI data |
 | **Evidence report** | One click prints (or saves as PDF) a design-review report, or downloads it as Markdown: the scenario, coverage status, the closest NASA records with their verbatim cells, and data citations in text and BibTeX |
+| **Evidence Gap Atlas** | The finding above, computed live: four mission atmospheres × eight cabin materials × two airflows, each cell showing the closest NASA record's score and O₂ distance, one click to open it, and a CSV export of all 64 configurations |
 | **Smoke-detection evidence** | The Detection pillar lists NASA's microgravity smoke tests (SAME, SAME-R) for the selected material, with airflow, heater level and aging time verbatim, and NASA's stated aim for spacecraft fire detectors. Unscored, because the tables hold no detector results |
 | **Ask NASA's records** | Questions across all 23 investigations (for example "Which suppressants did NASA test?") answered by retrieval-augmented SI from NASA's own text. Every sentence cites a passage, quotations must match NASA's words, every number must appear in the cited passage, and it refuses when the records don't cover the question |
 | **Validation you can rerun** | Seven acceptance scenarios re-run live in the browser against what each must show, with one-click Open to inspect any of them |
 
 ![Headline match score, the SI evidence briefing panel and the flammability regime map (O₂ vs cabin airflow) for a silicone lunar-base cabin](docs/images/screenshot-evidence.jpg)
+
+## Finding: NASA's open fire data covers the ISS, not Artemis
+
+Run across the mission atmospheres in the challenge statement, FlameBound finds that NASA's PSI flammability data covers **today's ISS cabin for 8 of 8 common cabin materials, and the lunar base, exploration and EVA atmospheres planned for Artemis for 0 of 24** (at both 5 and 20 cm/s cabin airflow, 0 g).
+
+| Material (0 g, 20 cm/s) | ISS (21% O₂, 101 kPa) | Lunar base (30%, 70 kPa) | Exploration (34%, 57 kPa) | EVA (100%, 30 kPa) |
+|---|---|---|---|---|
+| SIBAL, PMMA, Nomex, silicone | covered, 82.9–84% | gap, 72.7% | gap, 68.6% | gap, 55.2% |
+| Kapton, Teflon, Pyrell, lampwick | covered, 77.8% | gap, 66.5% | gap, 62.3% | gap, 48.9% |
+
+**Why.** PSI holds five solid-material flammability investigations. The three whose tables record oxygen (BASS-II, SAFFIRE-I, SAFFIRE-II) all ran between 13.6% and 22.2% O₂, and none recorded cabin pressure. Only ACME BRE, a gas-fuelled burner that stands in for solids, reached 26.5–40% O₂. The lunar base keeps about the same oxygen partial pressure as the ISS but with less nitrogen, and a higher oxygen fraction makes materials more flammable (general combustion physics), which is why the oxygen gate uses concentration.
+
+**Scope.** This is coverage of NASA's open PSI corpus as ingested here, not of every test NASA has run. For Kapton, Teflon, Pyrell and lampwick, "covered" means NASA tested a similar solid. Data coverage is not a fire-safety rating. The in-app Evidence Gap Atlas computes every cell live, opens any of them in one click, and exports all 64 configurations as CSV; `tests/atlas.test.ts` recomputes the finding and the corpus facts from the data on every CI run.
 
 ## How it works
 
@@ -115,7 +129,7 @@ While it is active, no conclusion is drawn about the engineer's cabin.
 
 | Check | Result |
 | --- | --- |
-| Automated tests (`npm test`, run in [CI](https://github.com/prattaybanik03/flamebound-flame-in-freefall/actions/workflows/ci.yml) on every push) | 78 passing: scoring rules, missing-data handling, levels and ranges, the O₂ gate, verdict gating, explanation wording, URL round trips, and the SI firewall (uncited sentences, invented numbers, unknown citations, safety verdicts, hazard-first wording, sentence splitting around decimals), provider routing and request formats for Anthropic and OpenAI-compatible APIs, the seven acceptance scenarios, verbatim NASA quotes, the evidence report, the retriever (hit@5 on 12 labelled questions) and the Q&A firewall |
+| Automated tests (`npm test`, run in [CI](https://github.com/prattaybanik03/flamebound-flame-in-freefall/actions/workflows/ci.yml) on every push) | 84 passing: scoring rules, missing-data handling, levels and ranges, the O₂ gate, verdict gating, explanation wording, URL round trips, and the SI firewall (uncited sentences, invented numbers, unknown citations, safety verdicts, hazard-first wording, sentence splitting around decimals), provider routing and request formats for Anthropic and OpenAI-compatible APIs, the seven acceptance scenarios, verbatim NASA quotes, the evidence report, the retriever (hit@5 on 12 labelled questions), the Q&A firewall, and the Evidence Gap Atlas finding |
 | Weight robustness (`npm run robustness`) | Each weight ×0.8 and ×1.2 (renormalised), 6 scenarios, 60 runs. Top match unchanged in **58/60**, top-3 order in 55/60, hazard decision in **60/60**. The two changes are a near-tie (ACME BRE 60.5% vs SAFFIRE-II 58.8%, Nomex at 34% O₂), both below the threshold either way |
 | SI briefing, live model (Claude Haiku 5.5, effort `low`) | 7 of 7 acceptance scenarios produced a briefing that passed the firewall (6–10 s each). Each was read against its NASA records: hazards stated first, every number traceable to a NASA cell, no safety verdicts. A draft that fails verification gets one correction attempt with its specific problems; if that fails too, the labelled deterministic brief is shown |
 | Accessibility (axe-core, WCAG 2.1 AA) | 0 violations on the hazard, ISS-baseline and suppression scenarios; all text meets AA contrast (small helper text 5.8:1 on panels), visible keyboard focus, and the only animation stops under reduced-motion |

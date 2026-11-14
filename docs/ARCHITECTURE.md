@@ -71,10 +71,13 @@ Both SI features follow the same pattern: deterministic retrieval, generation by
 ### Provider independence (`provider.ts`)
 Two adapters cover almost every vendor: the Anthropic Messages API and OpenAI-compatible Chat Completions. The provider is selected by environment variables (vendor key, or a generic key with prefix detection and optional base URL and model). The deployed demo uses Claude Haiku 5.5 at low effort; every SI output is labelled with the provider and model that wrote it. Keys stay on the server; requests are cached and rate-limited per IP.
 
-## 4. Evidence report (`report.ts`)
+## 4. Evidence Gap Atlas (`atlas.ts`)
+Runs the same engine over four mission atmospheres (ISS, lunar base, exploration, EVA) × eight cabin solids × two airflows at 0 g, and derives corpus facts (which solid investigations recorded O₂, their O₂ range, whether any recorded pressure) directly from the bundle. The headline in the page header is static so it renders without layout shift; a test recomputes it at both airflows and fails if the engine disagrees.
+
+## 5. Evidence report (`report.ts`)
 Markdown and print-ready HTML built from the same structured data: scenario, coverage status, the five closest records with their verbatim cells, and data citations in text and BibTeX. It contains no SI text, so it can go into a design review as a deterministic record.
 
-## 5. Quality gates
+## 6. Quality gates
 
 | Gate | Where |
 |---|---|
@@ -88,7 +91,7 @@ Markdown and print-ready HTML built from the same structured data: scenario, cov
 | Accessibility | axe-core, WCAG 2.1 AA, checked on the production build |
 | Q&A with the live model | 16 questions run through the live model (Claude Haiku 5.5): on the final run, 11 of 12 hand-labelled questions got a verified answer citing a correct investigation (the miss, a quoted official title, was fixed and then passed 2 of 2), all 3 off-topic questions were refused, and a question baiting a safety verdict got none. 1.6–6.6 s per answer. The labelled questions were also used during development, so this is a development check, not a held-out benchmark |
 
-## 6. Known limits
+## 7. Known limits
 - PSI contains no partial-gravity combustion data; Moon and Mars scenarios always raise the hazard.
 - Solid-material tables do not record pressure, so solids cap at 85% BCMS.
 - Weights, scales, the 65% threshold and the ±2-point gate are design choices, not validated safety limits.
