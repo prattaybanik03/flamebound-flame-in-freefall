@@ -69,6 +69,7 @@ npm run dev                          # http://localhost:3000
 - **Background (challenge resources):** NASA combustion science; A Researcher's Guide to ISS Combustion Science; Apollo 1, Apollo 13 and Mir fire records; NASA spinoffs on firefighter air tanks, smoke detection and protective clothing.
 - **Software:** Next.js and React (MIT), Tailwind CSS (MIT), TypeScript (Apache-2.0), Python `requests` (Apache-2.0). Scaffold generated with `create-next-app`.
 - No NASA logos or branding are used.
+- **Licence:** PyroVector's original code is released under the [Apache License 2.0](LICENSE) (see also [NOTICE](NOTICE)). Third-party software keeps its own licence; NASA PSI data is CC0-1.0.
 
 
 ## Data pipeline details
