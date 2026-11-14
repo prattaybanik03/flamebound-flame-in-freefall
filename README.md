@@ -7,7 +7,7 @@
   <img alt="Challenge: Flame in Freefall" src="https://img.shields.io/badge/challenge-Flame%20in%20Freefall-e8590c">
   <img alt="Melbourne Local Event" src="https://img.shields.io/badge/event-Melbourne-334155">
   <img alt="License: Apache-2.0" src="https://img.shields.io/badge/license-Apache--2.0-blue">
-  <img alt="Tests: 65 passing" src="https://img.shields.io/badge/tests-65%20passing-2f9e44">
+  <a href="https://github.com/prattaybanik03/flamebound-flame-in-freefall/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/prattaybanik03/flamebound-flame-in-freefall/actions/workflows/ci.yml/badge.svg"></a>
 </p>
 
 <p align="center">
@@ -45,6 +45,7 @@ Pick a mission atmosphere (ISS, lunar base or rover, exploration atmosphere, EVA
 | **NASA's own words on 1 g screening** | Verbatim statements from the BASS, BASS-II, SAFFIRE-II and FLEX records, with DOIs, on why Earth screening may not be conservative in microgravity. A test checks every quote character for character against the PSI data |
 | **Evidence report** | One click prints (or saves as PDF) a design-review report, or downloads it as Markdown: the scenario, coverage status, the closest NASA records with their verbatim cells, and data citations in text and BibTeX |
 | **Smoke-detection evidence** | The Detection pillar lists NASA's microgravity smoke tests (SAME, SAME-R) for the selected material, with airflow, heater level and aging time verbatim, and NASA's stated aim for spacecraft fire detectors. Unscored, because the tables hold no detector results |
+| **Ask NASA's records** | Questions across all 23 investigations (for example "Which suppressants did NASA test?") answered by retrieval-augmented SI from NASA's own text. Every sentence cites a passage, quotations must match NASA's words, every number must appear in the cited passage, and it refuses when the records don't cover the question |
 | **Validation you can rerun** | Seven acceptance scenarios re-run live in the browser against what each must show, with one-click Open to inspect any of them |
 
 ![Headline match score, the SI evidence briefing panel and the flammability regime map (O₂ vs cabin airflow) for a silicone lunar-base cabin](docs/images/screenshot-evidence.jpg)
@@ -75,7 +76,10 @@ flowchart TD
 - **Pipeline (Python).** Pulls every investigation and experimental table from NASA's public PSI API. It converts each condition to canonical units (O₂ % by volume, pressure in kPa, airflow in cm/s) through explicit, auditable column mappings. Every value gets a status: `recorded`, `approx`, `range`, `levels`, `footnote`, `not_recorded`, `unparsed` or `suspect`. See [docs/DATA.md](docs/DATA.md).
 - **Engine (TypeScript, in the browser).** Pure functions score, rank, gate and assemble evidence. Ranking is instant, works offline once loaded, and never calls an AI model.
 - **SI layer (server route, provider-agnostic).** The server recomputes the ranking from the canonical bundle. It sends the model only an evidence pack: the top active-pillar records with their verbatim NASA cells and the hazard reasons. The draft is accepted only if every sentence cites an evidence item, every number appears in the pack, and no safety verdict or recommendation is made. Otherwise the deterministic brief is shown, labelled as such. The API key never reaches the browser, and requests are cached and rate-limited. One adapter speaks the Anthropic Messages API and one speaks OpenAI-compatible Chat Completions, so the same app runs on Claude, ChatGPT, DeepSeek, Gemini, or any compatible endpoint (OpenRouter, Groq, Mistral, a local Ollama) by changing environment variables only. The briefing label always names the provider and model used.
-- **App (Next.js 16, deployed on Vercel).** A static page, one JSON data bundle and one server route. No tracking.
+- **Ask NASA's records (server route, retrieval-augmented).** BM25 retrieval over 193 passages of NASA's investigation text (objectives, hypotheses, approach, research impacts, publication titles). The model answers only from the retrieved passages and the answer passes its own firewall: cited sentences, verbatim quotations, numbers present in the cited passage, no safety verdicts, and an exact refusal when nothing relevant was retrieved.
+- **App (Next.js 16, deployed on Vercel).** A static page, two JSON data files and two server routes. No tracking.
+
+Full design and rationale: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## Method
 
@@ -111,11 +115,12 @@ While it is active, no conclusion is drawn about the engineer's cabin.
 
 | Check | Result |
 | --- | --- |
-| Automated tests (`npm test`) | 65 passing: scoring rules, missing-data handling, levels and ranges, the O₂ gate, verdict gating, explanation wording, URL round trips, and the SI firewall (uncited sentences, invented numbers, unknown citations, safety verdicts, hazard-first wording, sentence splitting around decimals), provider routing and request formats for Anthropic and OpenAI-compatible APIs, the seven acceptance scenarios, verbatim NASA quotes, and the evidence report |
+| Automated tests (`npm test`, run in [CI](https://github.com/prattaybanik03/flamebound-flame-in-freefall/actions/workflows/ci.yml) on every push) | 78 passing: scoring rules, missing-data handling, levels and ranges, the O₂ gate, verdict gating, explanation wording, URL round trips, and the SI firewall (uncited sentences, invented numbers, unknown citations, safety verdicts, hazard-first wording, sentence splitting around decimals), provider routing and request formats for Anthropic and OpenAI-compatible APIs, the seven acceptance scenarios, verbatim NASA quotes, the evidence report, the retriever (hit@5 on 12 labelled questions) and the Q&A firewall |
 | Weight robustness (`npm run robustness`) | Each weight ×0.8 and ×1.2 (renormalised), 6 scenarios, 60 runs. Top match unchanged in **58/60**, top-3 order in 55/60, hazard decision in **60/60**. The two changes are a near-tie (ACME BRE 60.5% vs SAFFIRE-II 58.8%, Nomex at 34% O₂), both below the threshold either way |
 | SI briefing, live model (Claude Haiku 5.5, effort `low`) | 7 of 7 acceptance scenarios produced a briefing that passed the firewall (6–10 s each). Each was read against its NASA records: hazards stated first, every number traceable to a NASA cell, no safety verdicts. A draft that fails verification gets one correction attempt with its specific problems; if that fails too, the labelled deterministic brief is shown |
 | Accessibility (axe-core, WCAG 2.1 AA) | 0 violations on the hazard, ISS-baseline and suppression scenarios; all text meets AA contrast (small helper text 5.8:1 on panels), visible keyboard focus, and the only animation stops under reduced-motion |
 | Performance (production build, CPU throttled 4×) | First paint 0.3 s, largest paint 1.2 s, layout shift 0, scrolling at 60 fps |
+| Ask NASA's records, live model | 16 questions run through the live model (Claude Haiku 5.5): on the final run, 11 of 12 hand-labelled questions got a verified answer citing a correct investigation (the miss, a quoted official title, was fixed and then passed 2 of 2), all 3 off-topic questions were refused, and a question baiting a safety verdict got none. 1.6–6.6 s per answer. The labelled questions were also used during development, so this is a development check, not a held-out benchmark |
 | Type-check and lint | `tsc` and ESLint clean |
 | Data integrity | No number is shown that is not either a NASA cell (verbatim, with its column) or a published formula result. Physically implausible source values (known table typos) are withheld and flagged |
 
@@ -149,7 +154,7 @@ python scripts/build_app_data.py
 cd web
 npm install
 cp .env.example .env.local   # optional: add ONE key (Anthropic, OpenAI, DeepSeek or Gemini) for the SI briefing
-npm test               # 65 tests
+npm test               # unit, acceptance and corpus tests
 npm run robustness     # weight-sensitivity check
 npm run dev            # http://localhost:3000
 ```

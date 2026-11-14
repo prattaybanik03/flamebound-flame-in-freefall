@@ -60,7 +60,8 @@ export async function POST(request: Request) {
       provider: source === "si" && resolved.ok ? resolved.config.name : null,
       sentences, evidence, problems, note, generatedAt: new Date().toISOString(),
     };
-    if (source === "si" || problems.length) cache.set(key, payload);
+    // Cache only verified briefings, so a rejected draft is retried on the next request.
+    if (source === "si") cache.set(key, payload);
     if (cache.size > 300) cache.delete(cache.keys().next().value as string);
     return Response.json(payload);
   };

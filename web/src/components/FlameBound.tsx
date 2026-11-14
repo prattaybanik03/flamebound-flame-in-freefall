@@ -20,6 +20,7 @@ import NasaContext from "./NasaContext";
 import ValidationPanel from "./ValidationPanel";
 import ReportButtons from "./ReportButtons";
 import DetectionView from "./DetectionView";
+import AskRecords from "./AskRecords";
 
 const DATA_URL = "/data/flamebound.json";
 const MATERIAL_KEYS: ReadonlySet<string> = new Set(MATERIAL_OPTIONS.map((m) => m.key));
@@ -140,6 +141,12 @@ export default function FlameBound() {
             {copied ? "Link copied" : "Copy scenario link"}
           </button>
           <a
+            href="#ask"
+            className="rounded-md border border-slate-700 px-3 py-1.5 text-xs text-slate-200 hover:border-orange-400 hover:text-orange-200"
+          >
+            Ask NASA&apos;s records
+          </a>
+          <a
             href="#validation"
             className="rounded-md border border-slate-700 px-3 py-1.5 text-xs text-slate-200 hover:border-orange-400 hover:text-orange-200"
           >
@@ -215,6 +222,7 @@ export default function FlameBound() {
             </section>
             </>
           )}
+          <AskRecords />
           <ValidationPanel
             bundle={bundle}
             onOpen={(t) => {

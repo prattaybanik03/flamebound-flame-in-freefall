@@ -75,6 +75,7 @@ export default function ValidationPanel({ bundle, onOpen }: { bundle: Bundle; on
         <li>Weight robustness: each weight moved ±20%, 60 runs. Top match unchanged in 58, hazard decision in all 60.</li>
         <li>SI briefing: 7 of 7 scenarios passed the citation and number checks with the live model.</li>
         <li>Accessibility: 0 WCAG 2.1 AA violations (axe-core) on three scenarios.</li>
+        <li>Ask NASA&apos;s records: 11 of 12 labelled questions answered and verified with a correct source; 3 of 3 off-topic questions refused.</li>
         <li>
           Full test suite and method:{" "}
           <a

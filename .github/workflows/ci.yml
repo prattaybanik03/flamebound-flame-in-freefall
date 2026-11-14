@@ -1,0 +1,53 @@
+# Runs on every push and pull request: the same checks the README reports.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  web:
+    name: Tests, types, lint and build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+      - name: Unit and acceptance tests
+        run: npm test
+      - name: Type check
+        run: npm run typecheck
+      - name: Lint
+        run: npm run lint
+      - name: Weight robustness check
+        run: npm run robustness
+      - name: Production build (no API key; SI falls back by design)
+        run: npm run build
+
+  data:
+    name: Passage corpus is reproducible
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Rebuild passages from the committed NASA records and require no diff
+        run: |
+          python scripts/build_passages.py
+          git diff --exit-code web/public/data/passages.json
