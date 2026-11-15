@@ -1,5 +1,5 @@
 // SI-assisted: drafted with Claude (Anthropic); reviewed by the team.
-// Roadmap: what exists today and what a funded team could add. No figures, dates or market claims.
+// Roadmap: what exists today and what could come next. No figures, dates or market claims.
 
 const BUILT: ReadonlyArray<readonly [string, string]> = [
   ["Scenario matching", "Finds the closest NASA experiments to your cabin, each linked to its source."],
@@ -41,7 +41,7 @@ export default function FuturePlans() {
     <section id="future" aria-labelledby="future-title" className="scroll-mt-16 rounded-lg border border-slate-800 bg-slate-900/50 p-5">
       <h2 id="future-title" className="text-2xl text-slate-50">Future plans</h2>
       <p className="mt-2 max-w-2xl text-sm text-slate-300">
-        FlameBound is a working prototype built on NASA&apos;s open data. These are directions a funded team could take. None of
+        FlameBound is a working prototype built on NASA&apos;s open data. These are directions for what comes next. None of
         them is built yet.
       </p>
 
@@ -59,7 +59,7 @@ export default function FuturePlans() {
         </div>
 
         <div>
-          <h3 className="text-lg text-slate-100">With proper development funding</h3>
+          <h3 className="text-lg text-slate-100">Next</h3>
 
           <div className="mt-3 rounded-md border-l-4 border-l-orange-400 bg-slate-900/80 p-4">
             <p className="font-display text-2xl leading-tight text-slate-50">Beyond space: fire safety on Earth</p>
