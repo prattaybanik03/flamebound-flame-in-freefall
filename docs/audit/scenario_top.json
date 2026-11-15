@@ -1,0 +1,268 @@
+[
+ {
+  "id": "iss",
+  "label": "ISS cabin, SIBAL fabric, 20 cm/s",
+  "inv": "PSI-98",
+  "acr": "SAFFIRE-I",
+  "bcms": 84,
+  "hazard": false,
+  "rec": {
+   "table": "PSI-98_Experimental table_SAFFIRE-1.csv",
+   "row": 0,
+   "ref": "S1",
+   "material": "SIBAL Fabric",
+   "o2": {
+    "min": 21.5,
+    "max": 21.7,
+    "levels": [],
+    "status": "range",
+    "raw": "21.5 - 21.7",
+    "col": "Percent O2"
+   },
+   "flow": {
+    "min": 20,
+    "max": 20,
+    "levels": [],
+    "status": "recorded",
+    "raw": "20",
+    "col": "Air Flow (cm/s)"
+   },
+   "pressure": {
+    "min": null,
+    "max": null,
+    "levels": [],
+    "status": "not_recorded",
+    "raw": "",
+    "col": ""
+   }
+  }
+ },
+ {
+  "id": "lunar-pmma",
+  "label": "Lunar base, PMMA, 5 cm/s",
+  "inv": "PSI-99",
+  "acr": "SAFFIRE-II",
+  "bcms": 60.1,
+  "hazard": true,
+  "rec": {
+   "table": "PSI-99_Experimental table_SAFFIRE-2.csv",
+   "row": 6,
+   "ref": "2-7",
+   "material": "PMMA & Nomex",
+   "o2": {
+    "min": 22.1,
+    "max": 22.1,
+    "levels": [],
+    "status": "approx",
+    "raw": "~ 22.1",
+    "col": "Percent O2 (Note 1)"
+   },
+   "flow": {
+    "min": 20,
+    "max": 20,
+    "levels": [],
+    "status": "recorded",
+    "raw": "20 cm/s",
+    "col": "Air Flow (cm/s)"
+   },
+   "pressure": {
+    "min": null,
+    "max": null,
+    "levels": [],
+    "status": "not_recorded",
+    "raw": "",
+    "col": ""
+   }
+  }
+ },
+ {
+  "id": "lunar-silicone",
+  "label": "Lunar base, silicone, 20 cm/s",
+  "inv": "PSI-99",
+  "acr": "SAFFIRE-II",
+  "bcms": 72.7,
+  "hazard": true,
+  "rec": {
+   "table": "PSI-99_Experimental table_SAFFIRE-2.csv",
+   "row": 1,
+   "ref": "2-2",
+   "material": "Silicone",
+   "o2": {
+    "min": 22.1,
+    "max": 22.1,
+    "levels": [],
+    "status": "approx",
+    "raw": "~ 22.1",
+    "col": "Percent O2 (Note 1)"
+   },
+   "flow": {
+    "min": 20,
+    "max": 20,
+    "levels": [],
+    "status": "recorded",
+    "raw": "20 cm/s",
+    "col": "Air Flow (cm/s)"
+   },
+   "pressure": {
+    "min": null,
+    "max": null,
+    "levels": [],
+    "status": "not_recorded",
+    "raw": "",
+    "col": ""
+   }
+  }
+ },
+ {
+  "id": "exploration-nomex",
+  "label": "Exploration atmosphere (34% O₂, 8.2 psi), Nomex",
+  "inv": "PSI-99",
+  "acr": "SAFFIRE-II",
+  "bcms": 68.6,
+  "hazard": true,
+  "rec": {
+   "table": "PSI-99_Experimental table_SAFFIRE-2.csv",
+   "row": 6,
+   "ref": "2-7",
+   "material": "PMMA & Nomex",
+   "o2": {
+    "min": 22.1,
+    "max": 22.1,
+    "levels": [],
+    "status": "approx",
+    "raw": "~ 22.1",
+    "col": "Percent O2 (Note 1)"
+   },
+   "flow": {
+    "min": 20,
+    "max": 20,
+    "levels": [],
+    "status": "recorded",
+    "raw": "20 cm/s",
+    "col": "Air Flow (cm/s)"
+   },
+   "pressure": {
+    "min": null,
+    "max": null,
+    "levels": [],
+    "status": "not_recorded",
+    "raw": "",
+    "col": ""
+   }
+  }
+ },
+ {
+  "id": "lunar-heptane",
+  "label": "Lunar base, heptane droplet, Suppression",
+  "inv": "PSI-69",
+  "acr": "FLEX",
+  "bcms": 77.7,
+  "hazard": false,
+  "rec": {
+   "table": "PSI-69_Experimental table_FLEX.csv",
+   "row": 41,
+   "ref": "42",
+   "material": "Heptane",
+   "o2": {
+    "min": 30,
+    "max": 30,
+    "levels": [],
+    "status": "recorded",
+    "raw": "0.3",
+    "col": "O initial ambient composition; mole fraction"
+   },
+   "flow": {
+    "min": null,
+    "max": null,
+    "levels": [],
+    "status": "not_recorded",
+    "raw": "",
+    "col": ""
+   },
+   "pressure": {
+    "min": 71.3273,
+    "max": 71.3273,
+    "levels": [],
+    "status": "recorded",
+    "raw": "535",
+    "col": "Ambient pressure; mmHg"
+   }
+  }
+ },
+ {
+  "id": "moon-gravity",
+  "label": "Moon gravity (0.16 g), SIBAL",
+  "inv": "PSI-99",
+  "acr": "SAFFIRE-II",
+  "bcms": 72.7,
+  "hazard": true,
+  "rec": {
+   "table": "PSI-99_Experimental table_SAFFIRE-2.csv",
+   "row": 4,
+   "ref": "2-5",
+   "material": "Cotton-Fiberglass (SIBAL)",
+   "o2": {
+    "min": 22.1,
+    "max": 22.1,
+    "levels": [],
+    "status": "approx",
+    "raw": "~ 22.1",
+    "col": "Percent O2 (Note 1)"
+   },
+   "flow": {
+    "min": 20,
+    "max": 20,
+    "levels": [],
+    "status": "recorded",
+    "raw": "20 cm/s",
+    "col": "Air Flow (cm/s)"
+   },
+   "pressure": {
+    "min": null,
+    "max": null,
+    "levels": [],
+    "status": "not_recorded",
+    "raw": "",
+    "col": ""
+   }
+  }
+ },
+ {
+  "id": "eva",
+  "label": "EVA suit, 100% O₂ at 4.3 psi",
+  "inv": "PSI-98",
+  "acr": "SAFFIRE-I",
+  "bcms": 55.2,
+  "hazard": true,
+  "rec": {
+   "table": "PSI-98_Experimental table_SAFFIRE-1.csv",
+   "row": 0,
+   "ref": "S1",
+   "material": "SIBAL Fabric",
+   "o2": {
+    "min": 21.5,
+    "max": 21.7,
+    "levels": [],
+    "status": "range",
+    "raw": "21.5 - 21.7",
+    "col": "Percent O2"
+   },
+   "flow": {
+    "min": 20,
+    "max": 20,
+    "levels": [],
+    "status": "recorded",
+    "raw": "20",
+    "col": "Air Flow (cm/s)"
+   },
+   "pressure": {
+    "min": null,
+    "max": null,
+    "levels": [],
+    "status": "not_recorded",
+    "raw": "",
+    "col": ""
+   }
+  }
+ }
+]

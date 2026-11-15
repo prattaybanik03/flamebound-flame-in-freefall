@@ -1,0 +1,65 @@
+atmosphere,o2_pct,airflow_cm_s,material,bcms_label,bcms_best_record,bcms_best_matches_exact_material,baseline_label,baseline_record,baseline_o2_gap_pct_points,labels_agree
+ISS cabin,21,5,sibal,covered,SAFFIRE-I S1,true,covered,BASS-II T25,0.2,true
+Lunar base / rover,30,5,sibal,gap,SAFFIRE-II 2-5,true,gap,SAFFIRE-II 2-5,7.9,true
+Exploration,34,5,sibal,gap,ACME BRE 20,false,gap,SAFFIRE-II 2-5,11.9,true
+EVA suit,100,5,sibal,gap,SAFFIRE-I S1,true,gap,SAFFIRE-II 2-5,77.9,true
+ISS cabin,21,5,pmma,covered,SAFFIRE-II 2-9,true,covered,BASS-II B6,0,true
+Lunar base / rover,30,5,pmma,gap,SAFFIRE-II 2-7,true,gap,BASS-II B1,7.8,true
+Exploration,34,5,pmma,gap,ACME BRE 20,false,gap,BASS-II B1,11.8,true
+EVA suit,100,5,pmma,gap,SAFFIRE-II 2-7,true,gap,BASS-II B1,77.8,true
+ISS cabin,21,5,nomex,covered,SAFFIRE-II 2-7,true,covered,BASS-II F2,0,true
+Lunar base / rover,30,5,nomex,gap,SAFFIRE-II 2-7,true,gap,BASS-II F1,7.8,true
+Exploration,34,5,nomex,gap,ACME BRE 20,false,gap,BASS-II F1,11.8,true
+EVA suit,100,5,nomex,gap,SAFFIRE-II 2-7,true,gap,BASS-II F1,77.8,true
+ISS cabin,21,5,silicone,covered,SAFFIRE-II 2-1,true,covered,SAFFIRE-II 2-1,0.5,true
+Lunar base / rover,30,5,silicone,gap,SAFFIRE-II 2-2,true,gap,SAFFIRE-II 2-2,7.9,true
+Exploration,34,5,silicone,gap,ACME BRE 20,false,gap,SAFFIRE-II 2-2,11.9,true
+EVA suit,100,5,silicone,gap,SAFFIRE-II 2-1,true,gap,SAFFIRE-II 2-2,77.9,true
+ISS cabin,21,5,kapton,covered,SAFFIRE-I S1,false,gap,BASS-II B6,0,false
+Lunar base / rover,30,5,kapton,gap,ACME BRE 8,false,gap,BASS-II B1,7.8,true
+Exploration,34,5,kapton,gap,ACME BRE 20,false,gap,BASS-II B1,11.8,true
+EVA suit,100,5,kapton,gap,SAFFIRE-I S1,false,gap,BASS-II B1,77.8,true
+ISS cabin,21,5,teflon,covered,SAFFIRE-I S1,false,gap,BASS-II B6,0,false
+Lunar base / rover,30,5,teflon,gap,ACME BRE 8,false,gap,BASS-II B1,7.8,true
+Exploration,34,5,teflon,gap,ACME BRE 20,false,gap,BASS-II B1,11.8,true
+EVA suit,100,5,teflon,gap,SAFFIRE-I S1,false,gap,BASS-II B1,77.8,true
+ISS cabin,21,5,pyrell,covered,SAFFIRE-I S1,false,gap,BASS-II B6,0,false
+Lunar base / rover,30,5,pyrell,gap,ACME BRE 8,false,gap,BASS-II B1,7.8,true
+Exploration,34,5,pyrell,gap,ACME BRE 20,false,gap,BASS-II B1,11.8,true
+EVA suit,100,5,pyrell,gap,SAFFIRE-I S1,false,gap,BASS-II B1,77.8,true
+ISS cabin,21,5,lampwick,covered,SAFFIRE-I S1,false,gap,BASS-II B6,0,false
+Lunar base / rover,30,5,lampwick,gap,ACME BRE 8,false,gap,BASS-II B1,7.8,true
+Exploration,34,5,lampwick,gap,ACME BRE 20,false,gap,BASS-II B1,11.8,true
+EVA suit,100,5,lampwick,gap,SAFFIRE-I S1,false,gap,BASS-II B1,77.8,true
+ISS cabin,21,20,sibal,covered,SAFFIRE-I S1,true,covered,BASS-II T25,0.2,true
+Lunar base / rover,30,20,sibal,gap,SAFFIRE-II 2-5,true,gap,SAFFIRE-II 2-5,7.9,true
+Exploration,34,20,sibal,gap,SAFFIRE-II 2-5,true,gap,SAFFIRE-II 2-5,11.9,true
+EVA suit,100,20,sibal,gap,SAFFIRE-I S1,true,gap,SAFFIRE-II 2-5,77.9,true
+ISS cabin,21,20,pmma,covered,SAFFIRE-II 2-9,true,covered,BASS-II B6,0,true
+Lunar base / rover,30,20,pmma,gap,SAFFIRE-II 2-7,true,gap,BASS-II B1,7.8,true
+Exploration,34,20,pmma,gap,SAFFIRE-II 2-7,true,gap,BASS-II B1,11.8,true
+EVA suit,100,20,pmma,gap,SAFFIRE-II 2-7,true,gap,BASS-II B1,77.8,true
+ISS cabin,21,20,nomex,covered,SAFFIRE-II 2-7,true,covered,BASS-II F2,0,true
+Lunar base / rover,30,20,nomex,gap,SAFFIRE-II 2-7,true,gap,BASS-II F1,7.8,true
+Exploration,34,20,nomex,gap,SAFFIRE-II 2-7,true,gap,BASS-II F1,11.8,true
+EVA suit,100,20,nomex,gap,SAFFIRE-II 2-7,true,gap,BASS-II F1,77.8,true
+ISS cabin,21,20,silicone,covered,SAFFIRE-II 2-1,true,covered,SAFFIRE-II 2-1,0.5,true
+Lunar base / rover,30,20,silicone,gap,SAFFIRE-II 2-2,true,gap,SAFFIRE-II 2-2,7.9,true
+Exploration,34,20,silicone,gap,SAFFIRE-II 2-2,true,gap,SAFFIRE-II 2-2,11.9,true
+EVA suit,100,20,silicone,gap,SAFFIRE-II 2-1,true,gap,SAFFIRE-II 2-2,77.9,true
+ISS cabin,21,20,kapton,covered,SAFFIRE-I S1,false,gap,BASS-II B6,0,false
+Lunar base / rover,30,20,kapton,gap,SAFFIRE-II 2-2,false,gap,BASS-II B1,7.8,true
+Exploration,34,20,kapton,gap,SAFFIRE-II 2-2,false,gap,BASS-II B1,11.8,true
+EVA suit,100,20,kapton,gap,SAFFIRE-I S1,false,gap,BASS-II B1,77.8,true
+ISS cabin,21,20,teflon,covered,SAFFIRE-I S1,false,gap,BASS-II B6,0,false
+Lunar base / rover,30,20,teflon,gap,SAFFIRE-II 2-2,false,gap,BASS-II B1,7.8,true
+Exploration,34,20,teflon,gap,SAFFIRE-II 2-2,false,gap,BASS-II B1,11.8,true
+EVA suit,100,20,teflon,gap,SAFFIRE-I S1,false,gap,BASS-II B1,77.8,true
+ISS cabin,21,20,pyrell,covered,SAFFIRE-I S1,false,gap,BASS-II B6,0,false
+Lunar base / rover,30,20,pyrell,gap,SAFFIRE-II 2-2,false,gap,BASS-II B1,7.8,true
+Exploration,34,20,pyrell,gap,SAFFIRE-II 2-2,false,gap,BASS-II B1,11.8,true
+EVA suit,100,20,pyrell,gap,SAFFIRE-I S1,false,gap,BASS-II B1,77.8,true
+ISS cabin,21,20,lampwick,covered,SAFFIRE-I S1,false,gap,BASS-II B6,0,false
+Lunar base / rover,30,20,lampwick,gap,SAFFIRE-II 2-2,false,gap,BASS-II B1,7.8,true
+Exploration,34,20,lampwick,gap,SAFFIRE-II 2-2,false,gap,BASS-II B1,11.8,true
+EVA suit,100,20,lampwick,gap,SAFFIRE-I S1,false,gap,BASS-II B1,77.8,true
