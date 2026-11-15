@@ -21,7 +21,7 @@ function Evidence({ e }: { e: VerdictEvidence }) {
 
       <div className="mt-3 grid gap-4 md:grid-cols-2">
         <div>
-          <h4 className="text-xs font-medium uppercase tracking-wide text-slate-500">NASA&apos;s values (verbatim)</h4>
+          <h3 className="text-xs font-medium uppercase tracking-wide text-slate-500">NASA&apos;s values (verbatim)</h3>
           <dl className="mt-1 grid grid-cols-[auto_1fr] gap-x-3 gap-y-0.5 text-xs">
             {e.facts.map((f) => (
               <div key={f.label} className="contents">
@@ -48,7 +48,7 @@ function Evidence({ e }: { e: VerdictEvidence }) {
           </dl>
         </div>
         <div>
-          <h4 className="text-xs font-medium uppercase tracking-wide text-slate-500">Differences from your target</h4>
+          <h3 className="text-xs font-medium uppercase tracking-wide text-slate-500">Differences from your target</h3>
           <dl className="mt-1 grid grid-cols-[auto_1fr] gap-x-3 gap-y-0.5 text-xs">
             {e.targetDeltas.map((d) => (
               <div key={d.label} className="contents">

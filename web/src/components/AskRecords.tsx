@@ -49,7 +49,7 @@ export default function AskRecords() {
     d?.source === "si" ? `SI answer · ${d.model} · verified` : d?.source === "refusal" ? "Not in NASA's records" : "Closest NASA passages (no SI answer)";
 
   return (
-    <section id="ask" aria-label="Ask NASA's records" className="scroll-mt-6 rounded-lg border border-violet-800 bg-violet-950/60 p-5">
+    <section id="ask" aria-label="Ask NASA's records" className="scroll-mt-16 rounded-lg border border-violet-800 bg-violet-950/60 p-5">
       <h2 className="text-lg text-slate-100">Ask NASA&apos;s records</h2>
       <p className="mt-1 max-w-3xl text-sm text-slate-400">
         Questions across all 23 investigations. SI answers only from the NASA passages it retrieves: every sentence must cite

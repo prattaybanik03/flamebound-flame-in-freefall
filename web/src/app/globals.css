@@ -89,6 +89,13 @@
   --text-xs--line-height: 1.4;
 }
 
+html {
+  scroll-behavior: auto;
+}
+@media (prefers-reduced-motion: no-preference) {
+  html { scroll-behavior: smooth; }
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
@@ -146,6 +153,7 @@ body::after {
   animation: ug-breathe 4.8s ease-in-out infinite;
   flex: none;
 }
+.ug-flame.ug-flame-sm { width: 1.5rem; height: 1.5rem; box-shadow: 0 0 10px 2px rgba(90, 184, 255, 0.35); }
 @keyframes ug-breathe {
   0%, 100% { transform: scale(1); opacity: 0.92; }
   50% { transform: scale(1.06); opacity: 1; }

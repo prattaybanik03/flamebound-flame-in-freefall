@@ -23,7 +23,9 @@ import DetectionView from "./DetectionView";
 import AskRecords from "./AskRecords";
 import GapAtlas from "./GapAtlas";
 import MaterialsChecker from "./MaterialsChecker";
-import { HEADLINE } from "@/lib/atlas";
+import SectionNav from "./SectionNav";
+import StartSection from "./StartSection";
+import FuturePlans from "./FuturePlans";
 
 const DATA_URL = "/data/flamebound.json";
 const MATERIAL_KEYS: ReadonlySet<string> = new Set(MATERIAL_OPTIONS.map((m) => m.key));
@@ -122,64 +124,28 @@ export default function FlameBound() {
     setAttempt((n) => n + 1);
   };
 
+  const actionBtn = "rounded-md border border-slate-700 px-3 py-1.5 text-xs text-slate-200 hover:border-orange-400 hover:text-orange-200";
   return (
-    <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-6 px-4 py-8 sm:px-6">
-      <header className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+    <>
+    <SectionNav ready={!!bundle} />
+    <main id="main" tabIndex={-1} className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-6 px-4 py-8 outline-none sm:px-6">
+      <StartSection />
+
+      <section id="scenario" aria-labelledby="scenario-title" className="flex scroll-mt-16 flex-col gap-4">
         <div>
-          <div className="flex items-center gap-3">
-            <span className="ug-flame" aria-hidden="true" />
-            <h1 className="text-4xl leading-none text-slate-50">FlameBound</h1>
-          </div>
-          <p className="mt-3 max-w-2xl text-sm text-slate-400">
-            NASA microgravity combustion investigations, matched to your habitat conditions and cited to their DOIs.
-            Without gravity, a candle flame burns as a dim blue sphere. FlameBound shows how far NASA&apos;s flight data covers your cabin.
-          </p>
-          <p className="mt-3 max-w-2xl rounded-md border-l-4 border-l-[#ff5a4f] bg-slate-900/70 px-3 py-2 text-sm text-slate-200">
-            <span className="font-display text-base text-slate-50">Finding:</span> NASA&apos;s open microgravity fire data covers
-            today&apos;s ISS cabin for {HEADLINE.issCovered} of {HEADLINE.issTotal} common materials, and the Artemis lunar,
-            exploration and EVA atmospheres for {HEADLINE.artemisCovered} of {HEADLINE.artemisTotal}.{" "}
-            <a href="#atlas" className="text-sky-300 underline underline-offset-2 hover:text-sky-200">See the Evidence Gap Atlas</a>
+          <h2 id="scenario-title" className="text-3xl text-slate-50">Explore a scenario</h2>
+          <p className="mt-1 max-w-2xl text-sm text-slate-300">
+            Choose a cabin atmosphere and a material. The closest NASA experiments appear below, with how well each one matches.
           </p>
         </div>
-        <nav aria-label="Scenario actions" className="flex flex-wrap gap-2 md:max-w-sm md:justify-end">
-          <button
-            type="button"
-            onClick={copyLink}
-            className="rounded-md border border-slate-700 px-3 py-1.5 text-xs text-slate-200 hover:border-orange-400 hover:text-orange-200"
-          >
+        <Controls target={target} onChange={setTarget} />
+        <div className="flex flex-wrap gap-2">
+          <button type="button" onClick={copyLink} className={actionBtn}>
             {copied ? "Link copied" : "Copy scenario link"}
           </button>
-          <a
-            href="#atlas"
-            className="rounded-md border border-slate-700 px-3 py-1.5 text-xs text-slate-200 hover:border-orange-400 hover:text-orange-200"
-          >
-            Evidence gaps
-          </a>
-          <a
-            href="#materials"
-            className="rounded-md border border-slate-700 px-3 py-1.5 text-xs text-slate-200 hover:border-orange-400 hover:text-orange-200"
-          >
-            Check your materials
-          </a>
-          <a
-            href="#ask"
-            className="rounded-md border border-slate-700 px-3 py-1.5 text-xs text-slate-200 hover:border-orange-400 hover:text-orange-200"
-          >
-            Ask NASA&apos;s records
-          </a>
-          <a
-            href="#validation"
-            className="rounded-md border border-slate-700 px-3 py-1.5 text-xs text-slate-200 hover:border-orange-400 hover:text-orange-200"
-          >
-            Validation
-          </a>
           {bundle && target.pillar !== "detection" && <ReportButtons target={target} ranked={ranked} hazard={hazard} builtOn={bundle.builtOn} />}
-        </nav>
-      </header>
-
-      <div id="scenario" className="scroll-mt-4">
-        <Controls target={target} onChange={setTarget} />
-      </div>
+        </div>
+      </section>
 
       {error ? (
         <div role="alert" className="rounded-lg border border-red-900 bg-red-950/40 p-4">
@@ -245,13 +211,6 @@ export default function FlameBound() {
             </section>
             </>
           )}
-          <GapAtlas
-            bundle={bundle}
-            onOpen={(t) => {
-              setTarget(t);
-              document.getElementById("scenario")?.scrollIntoView();
-            }}
-          />
           <MaterialsChecker
             bundle={bundle}
             onOpen={(t) => {
@@ -259,17 +218,26 @@ export default function FlameBound() {
               document.getElementById("scenario")?.scrollIntoView();
             }}
           />
+          <GapAtlas
+            bundle={bundle}
+            onOpen={(t) => {
+              setTarget(t);
+              document.getElementById("scenario")?.scrollIntoView();
+            }}
+          />
           <AskRecords />
+          <FuturePlans />
           <ValidationPanel
             bundle={bundle}
             onOpen={(t) => {
               setTarget(t);
-              window.scrollTo({ top: 0 });
+              document.getElementById("scenario")?.scrollIntoView();
             }}
           />
           <Method bundle={bundle} />
         </>
       )}
     </main>
+    </>
   );
 }

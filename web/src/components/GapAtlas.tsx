@@ -37,7 +37,7 @@ export default function GapAtlas({ bundle, onOpen }: { bundle: Bundle; onOpen: (
   };
 
   return (
-    <section id="atlas" aria-label="Evidence Gap Atlas" className="scroll-mt-6 rounded-lg border border-slate-800 bg-slate-900/50 p-5">
+    <section id="atlas" aria-label="Evidence Gap Atlas" className="scroll-mt-16 rounded-lg border border-slate-800 bg-slate-900/50 p-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="max-w-3xl">
           <h2 className="text-2xl text-slate-50">Evidence Gap Atlas: where NASA&apos;s microgravity fire data stops</h2>

@@ -19,7 +19,7 @@ export default function ValidationPanel({ bundle, onOpen }: { bundle: Bundle; on
   const passed = results.filter((x) => x.r.pass).length;
 
   return (
-    <section id="validation" aria-label="Validation" className="scroll-mt-6 rounded-lg border border-slate-800 bg-slate-900/50 p-5">
+    <section id="validation" aria-label="Validation" className="scroll-mt-16 rounded-lg border border-slate-800 bg-slate-900/50 p-5">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <h2 className="text-lg text-slate-100">Validation you can rerun</h2>
         <p className="text-sm text-slate-300">
@@ -33,7 +33,7 @@ export default function ValidationPanel({ bundle, onOpen }: { bundle: Bundle; on
         Each scenario is re-run through the same scoring engine as the rest of the page and checked against what it must
         show. Open one to inspect its evidence.
       </p>
-      <div className="mt-4 overflow-x-auto">
+      <div className="relative mt-4 overflow-x-auto">
         <table className="w-full min-w-[640px] text-left text-sm">
           <thead className="text-xs text-slate-400">
             <tr className="border-b border-slate-800">

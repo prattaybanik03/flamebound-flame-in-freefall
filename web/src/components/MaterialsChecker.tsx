@@ -64,7 +64,7 @@ export default function MaterialsChecker({ bundle, onOpen }: { bundle: Bundle; o
   };
 
   return (
-    <section id="materials" aria-label="Materials checker" className="scroll-mt-6 rounded-lg border border-slate-800 bg-slate-900/50 p-5">
+    <section id="materials" aria-label="Materials checker" className="scroll-mt-16 rounded-lg border border-slate-800 bg-slate-900/50 p-5">
       <h2 className="text-2xl text-slate-50">Materials checker: which of your materials does NASA&apos;s fire data cover?</h2>
       <p className="mt-2 max-w-3xl text-base text-slate-200">
         Paste a list of cabin materials, one per line, or load a CSV with a &ldquo;material&rdquo; column. FlameBound checks each against
