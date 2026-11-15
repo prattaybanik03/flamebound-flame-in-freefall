@@ -6,8 +6,8 @@ import { useEffect, useState } from "react";
 export const SECTIONS = [
   { id: "start", label: "Start" },
   { id: "scenario", label: "Explore" },
-  { id: "materials", label: "Your materials" },
-  { id: "atlas", label: "The gap" },
+  { id: "materials", label: "Check materials" },
+  { id: "atlas", label: "Evidence gaps" },
   { id: "ask", label: "Ask NASA" },
   { id: "future", label: "Future" },
   { id: "validation", label: "How it was checked" },

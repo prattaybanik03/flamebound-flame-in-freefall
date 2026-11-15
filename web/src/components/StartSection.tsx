@@ -43,8 +43,8 @@ export default function StartSection() {
 
       <div className="flex flex-wrap gap-2">
         <a href="#scenario" className="rounded-md bg-orange-500 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-orange-400">Explore a scenario</a>
-        <a href="#materials" className={BTN}>Check your materials</a>
-        <a href="#atlas" className={BTN}>See the gap</a>
+        <a href="#materials" className={BTN}>Check a materials list</a>
+        <a href="#atlas" className={BTN}>See the evidence gaps</a>
       </div>
 
       <p className="max-w-2xl rounded-md border-l-4 border-l-[#ff5a4f] bg-slate-900/70 px-3 py-2 text-sm text-slate-200">
