@@ -75,7 +75,7 @@ export default function SiBriefing({ target }: { target: Target }) {
                 isSi ? "border-violet-600 bg-violet-500/15 text-violet-200" : "border-slate-600 text-slate-300"
               }`}
             >
-              {isSi ? `SI-generated · ${current.data.model} · verified` : "Deterministic brief (no SI)"}
+              {isSi ? `SI-generated · ${current.data.model} · automated checks passed` : "Deterministic brief (no SI)"}
             </span>
             <span className="text-slate-400">{current.data.note}</span>
           </p>

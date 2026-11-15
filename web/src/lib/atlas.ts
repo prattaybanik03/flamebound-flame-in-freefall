@@ -54,7 +54,7 @@ export function signedO2Gap(target: number, o2: { min: number | null; max: numbe
 
 /** The headline shown in the page header (static, so it renders instantly). tests/atlas.test.ts
  *  recomputes it from the data at both airflows and fails if the engine ever disagrees. */
-export const HEADLINE = { issCovered: 8, issTotal: 8, artemisCovered: 0, artemisTotal: 24 };
+export const HEADLINE = { issCovered: 8, issTotal: 8, issExact: 4, artemisCovered: 0, artemisTotal: 24 };
 
 /** One configuration: the closest NASA flammability record and how well it covers the target. */
 export function atlasCell(bundle: Bundle, engine: Engine, atmosphere: Atmosphere, materialKey: string, flowCmS: number): AtlasCell | null {
@@ -118,6 +118,8 @@ export function summarise(cells: AtlasCell[]) {
   const artemis = cells.filter((c) => c.atmosphere.artemis);
   return {
     issCovered: iss.filter((c) => c.covered).length, issTotal: iss.length,
+    /** ISS cells whose closest record tests that very material (the rest are covered through a different solid). */
+    issExact: iss.filter((c) => c.covered && c.exactMaterial).length,
     artemisCovered: artemis.filter((c) => c.covered).length, artemisTotal: artemis.length,
   };
 }

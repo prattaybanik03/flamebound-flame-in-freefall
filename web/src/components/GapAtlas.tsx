@@ -42,10 +42,11 @@ export default function GapAtlas({ bundle, onOpen }: { bundle: Bundle; onOpen: (
         <div className="max-w-3xl">
           <h2 className="text-2xl text-slate-50">Evidence Gap Atlas: where NASA&apos;s microgravity fire data stops</h2>
           <p className="mt-2 text-base text-slate-200">
-            Within NASA&apos;s PSI flammability data, today&apos;s ISS cabin is covered for{" "}
-            <strong className="text-emerald-300">{s.issCovered} of {s.issTotal}</strong> common cabin materials. The lunar base,
-            exploration and EVA atmospheres planned for Artemis are covered for{" "}
-            <strong className="text-red-300">{s.artemisCovered} of {s.artemisTotal}</strong> combinations.
+            Within the NASA PSI flammability records FlameBound ingested, today&apos;s ISS cabin air has a close test for{" "}
+            <strong className="text-emerald-300">{s.issCovered} of {s.issTotal}</strong> common cabin materials ({s.issExact} on the
+            exact material, the rest through a different solid). The lunar base, exploration and EVA atmospheres planned for
+            Artemis have one for <strong className="text-red-300">{s.artemisCovered} of {s.artemisTotal}</strong> material and
+            atmosphere combinations at this airflow. These are classifications under FlameBound&apos;s matching rules, not safety findings.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">

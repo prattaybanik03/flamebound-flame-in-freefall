@@ -1,7 +1,7 @@
 "use client";
 // SI-assisted: drafted with Claude (Anthropic); reviewed by the team.
 // "Ask NASA's records": cross-cutting questions answered from the 23 PSI investigation records.
-// The label always says whether the text is a verified SI answer, a refusal, or retrieved passages only.
+// The label always says whether the text is an SI answer that passed automated checks, a refusal, or retrieved passages only.
 import { useState, type FormEvent } from "react";
 
 interface Passage { id: string; psi: string; acronym: string; field: string; doi: string; text: string }
@@ -46,7 +46,7 @@ export default function AskRecords() {
   const d = state.data;
   const byId = new Map((d?.passages ?? []).map((p) => [p.id, p]));
   const badge =
-    d?.source === "si" ? `SI answer · ${d.model} · verified` : d?.source === "refusal" ? "Not in NASA's records" : "Closest NASA passages (no SI answer)";
+    d?.source === "si" ? `SI answer · ${d.model} · automated checks passed` : d?.source === "refusal" ? "Not in NASA's records" : "Closest NASA passages (no SI answer)";
 
   return (
     <section id="ask" aria-label="Ask NASA's records" className="scroll-mt-16 rounded-lg border border-violet-800 bg-violet-950/60 p-5">

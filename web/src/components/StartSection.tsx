@@ -5,7 +5,7 @@ import { HEADLINE } from "@/lib/atlas";
 const BTN = "rounded-md border border-slate-700 px-4 py-2 text-sm text-slate-100 hover:border-orange-400 hover:text-orange-200";
 
 const TERMS: ReadonlyArray<readonly [string, string]> = [
-  ["Microgravity", "The near-weightless conditions on the International Space Station."],
+  ["Microgravity", "The near-weightless conditions in orbit, such as on the International Space Station."],
   ["Atmosphere, O₂ %", "The share of the cabin air that is oxygen. Air on Earth is about 21% oxygen."],
   ["kPa (kilopascals)", "A measure of air pressure. Air at sea level is about 101 kPa."],
   ["Airflow", "How fast air moves past the flame, in centimetres per second."],
@@ -24,7 +24,7 @@ export default function StartSection() {
       <p className="font-display max-w-2xl text-3xl leading-tight text-slate-100">Fire behaves differently in space.</p>
       <p className="max-w-2xl text-base leading-relaxed text-slate-300">
         Without gravity, hot air doesn&apos;t rise, so flames burn and spread in ways they don&apos;t on Earth. NASA has tested this
-        on the International Space Station. FlameBound checks whether those tests cover the air that future Moon bases and
+        in orbit. FlameBound checks whether those tests cover the air that future Moon bases and
         spacecraft will use, and shows clearly where they don&apos;t.
       </p>
 
@@ -48,9 +48,11 @@ export default function StartSection() {
       </div>
 
       <p className="max-w-2xl rounded-md border-l-4 border-l-[#ff5a4f] bg-slate-900/70 px-3 py-2 text-sm text-slate-200">
-        <span className="font-display text-base text-slate-50">Finding:</span> NASA&apos;s open microgravity fire data covers
-        today&apos;s ISS cabin for {HEADLINE.issCovered} of {HEADLINE.issTotal} common materials, and the Artemis lunar,
-        exploration and EVA atmospheres for {HEADLINE.artemisCovered} of {HEADLINE.artemisTotal}.{" "}
+        <span className="font-display text-base text-slate-50">Finding:</span> In the NASA records FlameBound ingested, today&apos;s ISS
+        cabin air has a close test for {HEADLINE.issCovered} of {HEADLINE.issTotal} common materials ({HEADLINE.issExact} on the
+        exact material, the rest through a different solid). The Artemis lunar, exploration and EVA atmospheres have one for{" "}
+        {HEADLINE.artemisCovered} of {HEADLINE.artemisTotal} material and atmosphere combinations, at each airflow setting. These are
+        classifications under FlameBound&apos;s matching rules.{" "}
         <a href="#atlas" className="text-sky-300 underline underline-offset-2 hover:text-sky-200">See the Evidence Gap Atlas</a>
       </p>
 

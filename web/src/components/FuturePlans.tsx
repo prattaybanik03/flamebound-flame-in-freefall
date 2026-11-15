@@ -5,7 +5,7 @@ const BUILT: ReadonlyArray<readonly [string, string]> = [
   ["Scenario matching", "Finds the closest NASA experiments to your cabin, each linked to its source."],
   ["Evidence Gap Atlas", "Shows which atmospheres and materials NASA's data covers, and which it doesn't."],
   ["Materials checker", "Checks a list of materials against the records, in your browser."],
-  ["Verified Q&A", "AI answers about NASA's records are checked against those records before they are shown."],
+  ["Checked Q&A", "AI answers about NASA's records pass automated citation and number checks before they are shown."],
 ];
 
 const FUNDED: ReadonlyArray<{ title: string; unlocks: string; needs: string }> = [
