@@ -77,7 +77,7 @@ export async function POST(request: Request) {
       return respond("fallback", [], v.problems, "The SI answer failed verification twice, so the closest NASA passages are shown instead.");
     }
     if (v.refusal) return respond("refusal", v.sentences, [], "The retrieved NASA records do not answer this question.");
-    return respond("si", v.sentences, [], "Answered by SI from NASA's records and verified against the cited passages.");
+    return respond("si", v.sentences, [], "Answered by SI from NASA's records; it passed automated citation, quote and number checks against the cited passages.");
   } catch {
     return respond("fallback", [], [], `SI request to ${cfg.name} timed out or failed; showing the closest NASA passages instead.`);
   }
