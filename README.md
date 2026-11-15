@@ -51,9 +51,9 @@ Pick a mission atmosphere (ISS, lunar base or rover, exploration atmosphere, EVA
 
 ![Headline match score, the SI evidence briefing panel and the flammability regime map (O₂ vs cabin airflow) for a silicone lunar-base cabin](docs/images/screenshot-evidence.jpg)
 
-## Finding: NASA's open fire data covers the ISS, not Artemis
+## Finding: evidence gaps for Artemis-style atmospheres in the ingested PSI data
 
-Run across the mission atmospheres in the challenge statement, FlameBound finds that NASA's PSI flammability data covers **today's ISS cabin for 8 of 8 common cabin materials, and the lunar base, exploration and EVA atmospheres planned for Artemis for 0 of 24** (at both 5 and 20 cm/s cabin airflow, 0 g).
+Run across the mission atmospheres in the challenge statement, FlameBound finds that, in the PSI records it ingested, NASA's flammability data has a close test for **today's ISS cabin for 8 of 8 common cabin materials (4 on the exact material, the rest through a different solid), but for 0 of 24 material-atmosphere combinations in the lunar base, exploration and EVA atmospheres planned for Artemis** (the same at both 5 and 20 cm/s cabin airflow, 0 g). These are classifications under FlameBound's matching rules, not safety findings.
 
 | Material (0 g, 20 cm/s) | ISS (21% O₂, 101 kPa) | Lunar base (30%, 70 kPa) | Exploration (34%, 57 kPa) | EVA (100%, 30 kPa) |
 |---|---|---|---|---|
@@ -129,12 +129,12 @@ While it is active, no conclusion is drawn about the engineer's cabin.
 
 | Check | Result |
 | --- | --- |
-| Automated tests (`npm test`, run in [CI](https://github.com/prattaybanik03/flamebound-flame-in-freefall/actions/workflows/ci.yml) on every push) | 84 passing: scoring rules, missing-data handling, levels and ranges, the O₂ gate, verdict gating, explanation wording, URL round trips, and the SI firewall (uncited sentences, invented numbers, unknown citations, safety verdicts, hazard-first wording, sentence splitting around decimals), provider routing and request formats for Anthropic and OpenAI-compatible APIs, the seven acceptance scenarios, verbatim NASA quotes, the evidence report, the retriever (hit@5 on 12 labelled questions), the Q&A firewall, and the Evidence Gap Atlas finding |
+| Automated tests (`npm test`, run in [CI](https://github.com/prattaybanik03/flamebound-flame-in-freefall/actions/workflows/ci.yml) on every push) | 95 passing: scoring rules, missing-data handling, levels and ranges, the O₂ gate, verdict gating, explanation wording, URL round trips, and the SI firewall (uncited sentences, invented numbers, unknown citations, safety verdicts, hazard-first wording, sentence splitting around decimals), provider routing and request formats for Anthropic and OpenAI-compatible APIs, the seven acceptance scenarios, verbatim NASA quotes, the evidence report, the retriever (hit@5 on 12 labelled questions), the Q&A firewall, and the Evidence Gap Atlas finding |
 | Weight robustness (`npm run robustness`) | Each weight ×0.8 and ×1.2 (renormalised), 6 scenarios, 60 runs. Top match unchanged in **58/60**, top-3 order in 55/60, hazard decision in **60/60**. The two changes are a near-tie (ACME BRE 60.5% vs SAFFIRE-II 58.8%, Nomex at 34% O₂), both below the threshold either way |
 | SI briefing, live model (Claude Haiku 5.5, effort `low`) | 7 of 7 acceptance scenarios produced a briefing that passed the firewall (6–10 s each). Each was read against its NASA records: hazards stated first, every number traceable to a NASA cell, no safety verdicts. A draft that fails verification gets one correction attempt with its specific problems; if that fails too, the labelled deterministic brief is shown |
-| Accessibility (axe-core, WCAG 2.1 AA) | 0 violations on the hazard, ISS-baseline and suppression scenarios; all text meets AA contrast (small helper text 5.8:1 on panels), visible keyboard focus, and the only animation stops under reduced-motion |
+| Accessibility (axe-core, WCAG 2.1 AA) | 0 automated violations on the hazard, ISS-baseline and suppression scenarios; all text meets AA contrast (small helper text 5.8:1 on panels), visible keyboard focus, and the only animation stops under reduced-motion |
 | Performance (production build, CPU throttled 4×) | First paint 0.3 s, largest paint 1.2 s, layout shift 0, scrolling at 60 fps |
-| Ask NASA's records, live model | 16 questions run through the live model (Claude Haiku 5.5): on the final run, 11 of 12 hand-labelled questions got a verified answer citing a correct investigation (the miss, a quoted official title, was fixed and then passed 2 of 2), all 3 off-topic questions were refused, and a question baiting a safety verdict got none. 1.6–6.6 s per answer. The labelled questions were also used during development, so this is a development check, not a held-out benchmark |
+| Ask NASA's records, live model | 16 questions run through the live model (Claude Haiku 5.5): on the final run, 11 of 12 hand-labelled questions got an answer that passed the automated checks and cited a correct investigation (the miss, a quoted official title, was fixed and then passed 2 of 2), all 3 off-topic questions were refused, and a question baiting a safety verdict got none. 1.6–6.6 s per answer. The labelled questions were also used during development, so this is a development check, not a held-out benchmark |
 | Type-check and lint | `tsc` and ESLint clean |
 | Data integrity | No number is shown that is not either a NASA cell (verbatim, with its column) or a published formula result. Physically implausible source values (known table typos) are withheld and flagged |
 
@@ -215,7 +215,7 @@ docs/               Data pipeline notes and screenshots
 - **Codex (OpenAI)** independently reviewed the build plan and the app. It wrote the explanation-sentence and numeric-firewall hardening in `web/src/lib/explain.ts`, with its regression tests.
 - Every AI-assisted source file carries an `SI-assisted` header comment.
 - The Next.js scaffold came from `create-next-app` (not AI).
-- **In the live app, an SI model writes the evidence briefing only.** It never ranks or scores. Each briefing is verified against the cited NASA records, or replaced by a labelled deterministic brief. Every ranking and score is computed deterministically from NASA's data.
+- **In the live app, an SI model writes the evidence briefing only.** It never ranks or scores. Each briefing is checked automatically (citations to the evidence, numbers that appear in it, no verdict wording), or replaced by a labelled deterministic brief. Every ranking and score is computed deterministically from NASA's data.
 
 ## Data, references and licences
 
