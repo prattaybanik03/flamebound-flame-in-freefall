@@ -18,6 +18,15 @@ const LINE = 140;
 
 export default function SectionNav({ ready }: { ready: boolean }) {
   const [active, setActive] = useState<string>("start");
+  // Below the lg breakpoint the links collapse into a "Jump to" menu, so nobody has to find a sideways scroll.
+  const [open, setOpen] = useState(false);
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open]);
+  const activeLabel = SECTIONS.find((s) => s.id === active)?.label ?? "Start";
 
   useEffect(() => {
     let frame = 0;
@@ -59,7 +68,7 @@ export default function SectionNav({ ready }: { ready: boolean }) {
             <span className="ug-flame ug-flame-sm" aria-hidden="true" />
             <span className="font-display hidden text-xl leading-none sm:inline">FlameBound</span>
           </a>
-          <ul className="flex min-w-0 flex-1 gap-1 overflow-x-auto py-1.5">
+          <ul className="hidden min-w-0 flex-1 gap-1 py-1.5 lg:flex">
             {SECTIONS.map((s) => {
               const on = active === s.id;
               return (
@@ -77,7 +86,39 @@ export default function SectionNav({ ready }: { ready: boolean }) {
               );
             })}
           </ul>
+          <button
+            type="button"
+            aria-expanded={open}
+            aria-controls="section-menu"
+            onClick={() => setOpen((o) => !o)}
+            className="ml-auto flex min-w-0 items-center gap-2 rounded-md border border-slate-700 px-3 py-2 text-sm text-slate-100 hover:border-orange-400 lg:hidden"
+          >
+            <span className="text-slate-400">Jump to</span>
+            <span className="truncate">{activeLabel}</span>
+            <svg aria-hidden="true" width="14" height="14" viewBox="0 0 14 14" className={`shrink-0 transition-transform ${open ? "rotate-180" : ""}`}>
+              <path d="M2 5l5 5 5-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
         </div>
+        {open && (
+          <ul id="section-menu" className="absolute inset-x-0 top-full border-b border-slate-800 bg-slate-950 px-4 py-2 shadow-lg shadow-black/50 sm:px-6 lg:hidden">
+            {SECTIONS.map((s) => {
+              const on = active === s.id;
+              return (
+                <li key={s.id}>
+                  <a
+                    href={`#${s.id}`}
+                    onClick={() => setOpen(false)}
+                    aria-current={on ? "location" : undefined}
+                    className={`block rounded-md px-3 py-3 text-base ${on ? "bg-slate-800 text-orange-200" : "text-slate-200 hover:bg-slate-900"}`}
+                  >
+                    {s.label}
+                  </a>
+                </li>
+              );
+            })}
+          </ul>
+        )}
       </nav>
     </>
   );
