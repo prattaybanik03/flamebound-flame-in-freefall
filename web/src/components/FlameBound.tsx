@@ -2,7 +2,7 @@
 // SI-assisted: drafted with Claude (Anthropic); reviewed by the team.
 // App shell: loads the PSI data bundle (built by scripts/build_app_data.py) once on mount.
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { Bundle, Target } from "@/lib/types";
 import { DEFAULT_TARGET, MATERIAL_OPTIONS } from "@/lib/presets";
 import { hazard as computeHazard, rank, scoreRecord } from "@/lib/bcms";
@@ -46,8 +46,17 @@ export default function FlameBound() {
   const [copied, setCopied] = useState(false);
   useEffect(() => {
     if (!urlReady) return;
-    window.history.replaceState(null, "", `${window.location.pathname}?${searchFromTarget(target)}`);
+    window.history.replaceState(null, "", `${window.location.pathname}?${searchFromTarget(target)}${window.location.hash}`);
   }, [target, urlReady]);
+  // Deep links such as /#future: the sections only exist once the data has loaded, so jump to the hash then.
+  const hashHandled = useRef(false);
+  useEffect(() => {
+    if (!urlReady || hashHandled.current) return;
+    hashHandled.current = true;
+    const id = decodeURIComponent(window.location.hash.slice(1));
+    if (!id) return;
+    requestAnimationFrame(() => document.getElementById(id)?.scrollIntoView());
+  }, [urlReady]);
   const copyLink = async () => {
     try {
       await navigator.clipboard.writeText(window.location.href);
